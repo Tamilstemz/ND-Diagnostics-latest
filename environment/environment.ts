@@ -17,5 +17,5 @@ export const environment = {
   APPLICANT_RECEIPT_API:
     "https://ndhealthcheck.com/appointment-service/transaction/invoice/pdf/",
   GIT_BASE: "/ND-Diagnostics-latest/",
-  // BASE: "/",
+  BASE: "/",
 };

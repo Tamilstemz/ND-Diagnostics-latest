@@ -9,8 +9,8 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname !== "/") {
-      navigate("/");
+    if (window.location.pathname !== "/ND-Diagnostics-latest/") {
+      navigate("/ND-Diagnostics-latest/");
 
       // Wait for navigation to complete, then scroll
       setTimeout(() => {

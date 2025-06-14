@@ -17,7 +17,7 @@ import "material-react-toastify/dist/ReactToastify.css";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/ND-Diagnostics-latest/" component={Home} />
       <Route path="/AppointmentBooking" component={AppointmentBooking} />
       <Route component={NotFound} />
     </Switch>

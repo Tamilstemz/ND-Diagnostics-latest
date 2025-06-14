@@ -975,11 +975,13 @@ const AppointmentBooking = () => {
             created_by: 1,
             slot_booking: [
               {
-                action_date: formatDateToDDMMYYYY(selectedDate),
+                action_date: formatDateToYYYYMMDDNew(new Date()),
+                date_booked: formatDateToYYYYMMDDNew(selectedDate),
+
                 booked_time: selectedslottime,
                 booking_from: 3,
                 booking_status: 1,
-                date_booked: formatDateToYYYYMMDDNew(new Date()),
+
                 department: "AU",
                 description: "Test Service",
                 service_code: formData.servicecode,
@@ -1751,6 +1753,7 @@ const AppointmentBooking = () => {
                                         className="form-control flex-grow-1"
                                         value={member.passportNo}
                                         onChange={(e) => handleChange(e, i)}
+                                        maxLength={12}
                                       />
                                     </div>
                                     <div className="col-md-6 d-flex align-items-center mt-3">
@@ -1763,6 +1766,7 @@ const AppointmentBooking = () => {
                                         className="form-control flex-grow-1"
                                         value={member.contactNumber}
                                         onChange={(e) => handleChange(e, i)}
+                                        maxLength={10}
                                       />
                                     </div>
 
@@ -1778,6 +1782,7 @@ const AppointmentBooking = () => {
                                             className="form-control flex-grow-1"
                                             value={member.hapId}
                                             onChange={(e) => handleChange(e, i)}
+                                            maxLength={15}
                                           />
                                         </div>
 
@@ -1801,6 +1806,7 @@ const AppointmentBooking = () => {
                                           <input
                                             type="text"
                                             name="alternativeNumber"
+                                            maxLength={10}
                                             className="form-control flex-grow-1"
                                             value={member.alternativeNumber}
                                             onChange={(e) => handleChange(e, i)}
@@ -1867,6 +1873,7 @@ const AppointmentBooking = () => {
                                 name="hapId"
                                 value={formData.hapId}
                                 onChange={handleChange}
+                                maxLength={15}
                               />
                             </div>
                           </div>
@@ -2022,6 +2029,7 @@ const AppointmentBooking = () => {
                                 name="passportNo"
                                 value={formData.passportNo}
                                 onChange={handleChange}
+                                maxLength={12}
                               />
                             </div>
                             <div className="col-md-6 d-flex align-items-center">
