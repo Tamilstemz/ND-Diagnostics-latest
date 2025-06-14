@@ -33,16 +33,16 @@ function App() {
         <main className="min-h-screen bg-background">
           <Router />
           <ToastContainer
-position="top-right"
-autoClose={3000}
-hideProgressBar
-newestOnTop={false}
-closeOnClick
-rtl={false}
-pauseOnFocusLoss
-draggable
-pauseOnHover
-/>
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </main>
         <Footer /> {/* ✅ Always visible */}
       </TooltipProvider>

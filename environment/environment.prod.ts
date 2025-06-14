@@ -7,6 +7,7 @@ export const environment = {
   AVAILABLE_SLOTS_API: 'https://ndhealthcheck.com/appointment-service/configuration/slot-listing',
   AVAILABLE_CENTER_API: 'https://ndhealthcheck.com/appointment-service/master/center?application=1',
   AVAILABLE_SERVIVCE_API: 'https://ndhealthcheck.com/appointment-service/master/service?status=1&application=1',
-  APPLICANT_WITH_APPT_API: 'https://ndhealthcheck.com/appointment-service/transaction/applicant-appointment/details'
-
+  APPLICANT_WITH_APPT_API: 'https://ndhealthcheck.com/appointment-service/transaction/applicant-appointment/details',
+  GIT_BASE: "/ND-Diagnostics-latest/",
+  // BASE: "/",
 };
