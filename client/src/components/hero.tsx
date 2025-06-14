@@ -1,0 +1,76 @@
+import { Button } from "@/components/ui/button";
+import { CalendarCheck, Info, Shield, Users, Clock, Award } from "lucide-react";
+import doctorImage from "@assets/newpic1_1749587017199.png";
+import { useLocation } from "wouter";
+
+export default function Hero() {
+  const [, navigate] = useLocation();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <section
+      id="home"
+      className="hero-gradient py-16 lg:py-24 relative overflow-hidden"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 via-brand-purple/5 to-brand-teal/5"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8">
+            <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+              <span className="text-brand-black">Australia Visa</span>
+              <br />
+              <span className="text-brand-orange">Medical Examinations</span>
+            </h1>
+
+            <p className="text-xl text-brand-black leading-relaxed">
+              Welcome to ND Diagnostics India Private Limited, your trusted
+              partner for comprehensive medical examinations required for
+              Australia visa applications.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                onClick={() => {
+                  navigate("/AppointmentBooking");
+
+                  // Scroll to top after navigating
+                  setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }, 50);
+                }}
+                size="lg"
+                className="card-gradient-blue text-white hover:shadow-xl font-semibold text-lg transition-all duration-300 hover:scale-105 border-0"
+              >
+                <CalendarCheck className="mr-2 h-5 w-5" />
+                Schedule Examination
+              </Button>
+              <Button
+                onClick={() => scrollToSection("about")}
+                variant="outline"
+                size="lg"
+                className="border-2 border-brand-orange text-brand-orange hover:card-gradient-orange hover:text-white hover:border-transparent font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <Info className="mr-2 h-5 w-5" />
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <img
+              src={doctorImage}
+              alt="Medical professional with equipment"
+              className="rounded-2xl shadow-2xl w-full h-[600px] object-cover transform hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
