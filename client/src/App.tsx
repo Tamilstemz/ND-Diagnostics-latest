@@ -13,12 +13,27 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { ToastContainer, toast } from "material-react-toastify";
 
 import "material-react-toastify/dist/ReactToastify.css";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfUse from "./components/TermsofService";
+import { environment } from "../../environment/environment";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/ND-Diagnostics-latest/" component={Home} />
-      <Route path="/AppointmentBooking" component={AppointmentBooking} />
+      <Route path={environment.BASE_PATH} component={Home} />
+      <Route
+        path={`${environment.BASE_PATH}AppointmentBooking`}
+        component={AppointmentBooking}
+      />
+      <Route
+        path={`${environment.BASE_PATH}Privacy-Policy`}
+        component={PrivacyPolicy}
+      />
+
+      <Route
+        path={`${environment.BASE_PATH}Terms-Of-Use`}
+        component={TermsOfUse}
+      />
       <Route component={NotFound} />
     </Switch>
   );
@@ -44,7 +59,7 @@ function App() {
             pauseOnHover
           />
         </main>
-        <Footer /> {/* ✅ Always visible */}
+        <Footer />
       </TooltipProvider>
     </QueryClientProvider>
   );

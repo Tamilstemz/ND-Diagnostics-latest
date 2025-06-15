@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Phone, Menu, X } from "lucide-react";
 import logoPath from "@assets/ND India Logo-01 (1)_1749586357933.png";
 import { useLocation } from "wouter";
+import { environment } from "../../../environment/environment";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname !== "/ND-Diagnostics-latest/") {
-      navigate("/ND-Diagnostics-latest/");
+    if (window.location.pathname !== environment.BASE_PATH) {
+      navigate(environment.BASE_PATH);
 
       // Wait for navigation to complete, then scroll
       setTimeout(() => {
@@ -147,10 +148,8 @@ export default function Header() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 onClick={() => {
-                  navigate("/AppointmentBooking");
+                  navigate(`${environment.BASE_PATH}AppointmentBooking`);
                   setMobileMenuOpen(false);
-
-                  // Scroll to top after navigating
                   setTimeout(() => {
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }, 50);
@@ -221,7 +220,13 @@ export default function Header() {
                     +91 9582-116116
                   </a>
                   <Button
-                    onClick={() => scrollToSection("contact")}
+                    onClick={() => {
+                      navigate(`${environment.BASE_PATH}AppointmentBooking`);
+                      setMobileMenuOpen(false);
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }, 50);
+                    }}
                     className="bg-brand-orange text-white hover:bg-orange-600 font-medium w-full"
                   >
                     Book Appointment

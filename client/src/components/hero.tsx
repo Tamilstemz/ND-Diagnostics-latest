@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarCheck, Info, Shield, Users, Clock, Award } from "lucide-react";
 import doctorImage from "@assets/newpic1_1749587017199.png";
 import { useLocation } from "wouter";
+import { environment } from "../../../environment/environment";
 
 export default function Hero() {
   const [, navigate] = useLocation();
@@ -14,10 +15,7 @@ export default function Hero() {
   };
 
   return (
-    <section
-      id="home"
-      className="hero-gradient py-16 lg:py-24 relative overflow-hidden"
-    >
+    <section id="home" className="hero-gradient py-16 lg:py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 via-brand-purple/5 to-brand-teal/5"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -37,9 +35,8 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => {
-                  navigate("/AppointmentBooking");
+                  navigate(`${environment.BASE_PATH}AppointmentBooking`);
 
-                  // Scroll to top after navigating
                   setTimeout(() => {
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }, 50);

@@ -5,7 +5,7 @@ import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { environment } from "./environment/environment";
 
 export default defineConfig({
-  base: environment.GIT_BASE,
+  base: environment.BASE_PATH,
   plugins: [
     react(),
     runtimeErrorOverlay(),

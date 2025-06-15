@@ -24,6 +24,138 @@
   border-radius: 6px;
 }
 
+input,
+textarea,
+select {
+  outline: none;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* On focus effect */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #007bff; /* Bootstrap blue */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* glowing effect */
+  outline: none;
+}
+
+/* For Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* For Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.btn-custom-orange {
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  padding: 8px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #ffa63d;
+  transition: all 0.3s ease;
+}
+
+.btn-custom-orange:hover {
+  /* background: linear-gradient(to right, #FF8C00, #FF5722); */
+  background: #ff5722;
+  transition: all 0.3s ease;
+  transform: scale(1.05); /* pop out slightly */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* optional shadow for depth */
+  z-index: 1; /* come to front */
+}
+
+.calendar-day {
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+  background-color: #ff8511a6 !important;
+  cursor: pointer !important;
+}
+
+.calendar-day.selected {
+  background-color: #ff8511a6 !important;
+  color: black !important;
+}
+
+.calendar-wrapper {
+  position: relative;
+}
+
+.calendar-tooltip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* background-color: #ffc107; */
+  color: red;
+  padding: 10px 15px;
+  /* border-radius: 8px; */
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.calendar-grid {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(10px);
+  filter: blur(2px);
+}
+
+.calendar-grid.active {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translateY(0);
+  filter: blur(0);
+  
+}
+
+.slot-transition {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeftToRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slot-slide-in {
+  animation: slideInLeftToRight 0.4s ease-out;
+  transition: all 0.3s ease-in-out;
+}
+
+
 /* .modal-content {
   position: relative;
   display: flex;
