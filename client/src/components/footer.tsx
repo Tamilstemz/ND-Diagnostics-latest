@@ -51,7 +51,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
               <img
@@ -66,9 +66,9 @@ export default function Footer() {
             <p className="text-gray-400 mb-6 max-w-lg">
               Your trusted partner for Australia visa medical examinations.
             </p>
-            <div className="flex flex-col sm:flex-row items-center space-x-20 gap-4 sm:gap-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-0 sm:space-x-20">
               {/* Social Media Icons */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 justify-center sm:justify-start">
                 <a
                   href="#"
                   className="w-8 sm:w-10 h-8 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-brand-orange transition-colors"
@@ -95,9 +95,8 @@ export default function Footer() {
                 </a>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <div className="flex flex-col items-center sm:items-center sm:ml-auto">
-                  <span className="text-xs font-semibold text-gray-400 mb-1">
+              <div className="flex flex-col items-center sm:items-end">
+                  <span style={{whiteSpace:'nowrap'}} className="text-xs font-semibold text-gray-400 mb-1">
                     Location QR
                   </span>
                   <img
@@ -105,7 +104,6 @@ export default function Footer() {
                     alt="Google Maps Location QR Code"
                     className="w-[60px] sm:w-[70px] h-[50px] sm:h-[60px] rounded-lg bg-white/10 p-1 hover:bg-white/20 transition-all duration-300"
                   />
-                </div>
               </div>
             </div>
           </div>
@@ -121,6 +119,14 @@ export default function Footer() {
                   Home
                 </button>
               </li>
+               <li>
+                <button
+                  onClick={() => scrollToSection("services")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Services
+                </button>
+              </li>
               <li>
                 <button
                   onClick={() => scrollToSection("about")}
@@ -129,14 +135,16 @@ export default function Footer() {
                   About Us
                 </button>
               </li>
-              <li>
+
+               <li>
                 <button
-                  onClick={() => scrollToSection("services")}
+                  onClick={() => scrollToSection("documents")}
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Services
+                  Documents Required
                 </button>
               </li>
+             
               <li>
                 <button
                   onClick={() => scrollToSection("contact")}
@@ -164,17 +172,18 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Contact Info</h4>
             <ul className="space-y-3">
-               <li className="flex items-center gap-3">
+               <li className="flex gap-3">
                 <MapPin className="text-brand-orange h-6 w-6 flex-shrink-0" />
                 <span className="text-gray-400">
                   ND Diagnostics India Pvt Ltd, 2nd Floor, Coastal Chambers
                   Building, MG Road, Ravipuram, Kochi Ernakulam - 682015
-                  Ph:9582-116116
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="text-brand-orange h-6 w-6 flex-shrink-0" />
-                <span className="text-gray-400">+91 9582-116116</span>
+                <a href="tel:+919582116116" className="text-gray-400">
+                  +91 9582-116116
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="text-brand-orange h-6 w-6 flex-shrink-0" />
@@ -190,11 +199,11 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col gap-3 justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
               ©2025 ND Diagnostics India Private Limited. All rights reserved.
             </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-6">
               <button
                 onClick={() => {
                   navigate(`${environment.BASE_PATH}Privacy-Policy`);
