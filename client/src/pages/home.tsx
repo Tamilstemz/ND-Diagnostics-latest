@@ -46,8 +46,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <Hero />
         </motion.div>
@@ -55,8 +56,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <MissionVision />
         </motion.div>
@@ -64,8 +66,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <Services />
         </motion.div>
@@ -73,8 +76,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <About />
         </motion.div>
@@ -82,8 +86,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <Process />
         </motion.div>
@@ -91,8 +96,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <Documents />
         </motion.div>
@@ -100,8 +106,9 @@ export default function Home() {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.1 }} 
           variants={sectionVariants}
+          className="min-h-screen py-20 px-4 sm:px-6 lg:px-8"
         >
           <Contact />
         </motion.div>

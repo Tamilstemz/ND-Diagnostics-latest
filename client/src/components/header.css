@@ -1,0 +1,75 @@
+/* Default Navlinks style */
+.Navlinks {
+  white-space: nowrap;
+}
+
+
+
+/* Responsive fix for 768px width and 498px height */
+@media (max-height: 550px) and (min-width: 768px) {
+
+  .Navlinks {
+    font-size: 0.7rem !important;
+    white-space: nowrap !important;
+  }
+
+  .glass-effect img {
+    max-height: 40px !important; /* reduce height further for tight vertical space */
+    height: auto !important;
+    width: auto !important;
+  }
+
+  /* Optional: force the header to shrink padding for space */
+  header {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  /* Optional: If motion.div around image has vertical constraints, override */
+  .logo-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    height: auto !important;
+  }
+
+
+  .card-gradient-orange {
+    padding: 0rem 0.3rem !important; /* smaller padding */
+    font-size: 0.6rem !important;       /* slightly smaller text */
+  }
+
+  .book-btn {
+    height: 35px !important;
+  }
+
+  .md\\:flex {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+
+  .md\\:hidden {
+    display: none !important;
+  }
+
+  .mobile-menu {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+  }
+
+  /* Make the phone link smaller */
+  .Navlinks.phone-link {
+    font-size: 0.7rem !important;
+    padding: 0.2rem 0.5rem !important;
+  }
+
+  .Navlinks.phone-link svg {
+    height: 0.7rem !important;
+    width: 0.7rem !important;
+  }
+}
+
+
+
+
+

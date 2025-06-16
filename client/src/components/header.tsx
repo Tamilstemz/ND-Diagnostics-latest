@@ -5,46 +5,70 @@ import { Phone, Menu, X } from "lucide-react";
 import logoPath from "@assets/ND India Logo-01 (1)_1749586357933.png";
 import { useLocation } from "wouter";
 import { environment } from "../../../environment/environment";
+import "./header.css";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+ 
+
+
   const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname !== environment.BASE_PATH) {
-      navigate(environment.BASE_PATH);
 
-      // Wait for navigation to complete, then scroll
-      setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const offset = 120;
-          const elementPosition =
-            element.getBoundingClientRect().top + window.pageYOffset;
-          const offsetPosition = elementPosition - offset;
+    const getDynamicOffset = (id: string): number => {
+      const header = document.getElementById(id); // updated to use ID
+      if (header) {
+        const computedStyle = getComputedStyle(header);
+        const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+        return Math.round( marginBottom + paddingBottom + 16);
+      }
+      return 100; // fallback
+    };
 
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth",
-          });
-        }
-      }, 100); // slight delay to ensure DOM is rendered
-    } else {
-      const element = document.getElementById(sectionId);
+    const getElementPosition = (element: HTMLElement): number => {
+      const rect = element.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const clientTop = document.documentElement.clientTop || 0;
+      return rect.top + scrollTop - clientTop;
+    };
+
+    const scrollWithOffset = (id: string, retries = 10) => {
+      const element = document.getElementById(id);
+      const offset = getDynamicOffset(id);
+
       if (element) {
-        const offset = 120;
-        const elementPosition =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - offset;
+        const elementTop = getElementPosition(element);
+        const offsetTop = Math.max(0, elementTop - offset);
+
 
         window.scrollTo({
-          top: offsetPosition,
+          top: offsetTop,
           behavior: "smooth",
         });
+      } else if (retries > 0) {
+        console.log(`Element #${id} not found. Retrying... (${retries})`);
+        setTimeout(() => scrollWithOffset(id, retries - 1), 300);
+      } else {
+        console.warn(`Failed to find section: #${id}`);
       }
-    }
+    };
 
-    setMobileMenuOpen(false);
+    if (window.location.pathname !== environment.BASE_PATH) {
+      navigate(environment.BASE_PATH);
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 500);
+      setMobileMenuOpen(false);
+    } else {
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 300);
+      setMobileMenuOpen(false);
+      
+    }
   };
+
 
   const headerVariants = {
     hidden: { y: -100 },
@@ -79,13 +103,13 @@ export default function Header() {
 
   return (
     <motion.header
-      className="glass-effect shadow-lg sticky top-0 z-50 border-b border-white/20"
+      className="glass-effect shadow-lg sticky top-0 z-50 border-b border-white/20 w-full"
       initial="hidden"
       animate="visible"
       variants={headerVariants}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-4 gap-y-2 md:flex-nowrap">
           <motion.div
             className="flex items-center space-x-3"
             initial={{ opacity: 0, x: -50 }}
@@ -95,7 +119,7 @@ export default function Header() {
             <motion.img
               src={logoPath}
               alt="ND Diagnostics India Logo"
-              className="h-20 w-auto"
+              className="h-16 sm:h-20 w-auto max-h-[60px] object-contain"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             />
@@ -117,7 +141,7 @@ export default function Header() {
               <motion.button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className="text-brand-black hover:text-brand-orange font-medium transition-all duration-300 hover:scale-105 px-2 py-1 rounded-lg hover:bg-light-orange"
+                className="Navlinks text-gray-700 hover:text-brand-orange text-left block w-full font-medium transition-colors"
                 variants={navItemVariants}
                 initial="hidden"
                 animate="visible"
@@ -131,16 +155,17 @@ export default function Header() {
           </motion.nav>
 
           <motion.div
-            className="hidden md:flex items-center space-x-4"
+            className="hidden md:flex items-center gap-4 lg:gap-6"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <motion.a
               href="tel:+919582116116"
-              className="text-brand-black hover:text-brand-orange font-medium flex items-center transition-all duration-300 hover:scale-105 px-3 py-2 rounded-lg hover:bg-light-orange"
+              className="Navlinks phone-link text-brand-black hover:text-brand-orange font-medium flex items-center transition-all duration-300 hover:scale-105 px-3 py-2 rounded-lg hover:bg-light-orange"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              
             >
               <Phone className="mr-2 h-4 w-4" />
               +91 9582-116116
@@ -154,7 +179,7 @@ export default function Header() {
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }, 50);
                 }}
-                className="card-gradient-orange text-white hover:shadow-lg font-medium transition-all duration-300 border-0"
+                className="card-gradient-orange w-full md:w-auto px-6 py-2 text-white font-medium hover:shadow-lg transition-all duration-300 border-0 book-btn"
               >
                 Book Appointment
               </Button>
@@ -198,7 +223,7 @@ export default function Header() {
                   <motion.button
                     key={item.id}
                     onClick={() => scrollToSection(item.id)}
-                    className="text-gray-700 hover:text-brand-orange font-medium transition-colors text-left"
+                    className="Navlinks text-gray-700 hover:text-brand-orange text-left block w-full font-medium transition-colors"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -206,12 +231,7 @@ export default function Header() {
                     {item.label}
                   </motion.button>
                 ))}
-                <motion.div
-                  className="pt-4 border-t border-gray-200"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
+      
                   <a
                     href="tel:+919582116116"
                     className="text-brand-blue hover:text-accent-blue font-medium flex items-center mb-4"
@@ -227,11 +247,11 @@ export default function Header() {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }, 50);
                     }}
-                    className="bg-brand-orange text-white hover:bg-orange-600 font-medium w-full"
+                    className="card-gradient-orange w-full md:w-auto px-6 py-2 text-white font-medium hover:shadow-lg transition-all duration-300 border-0"
                   >
                     Book Appointment
                   </Button>
-                </motion.div>
+              
               </nav>
             </motion.div>
           )}
