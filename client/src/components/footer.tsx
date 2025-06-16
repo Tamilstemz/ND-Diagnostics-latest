@@ -12,11 +12,40 @@ import { environment } from "../../../environment/environment";
 export default function Footer() {
   const [, navigate] = useLocation();
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+
+ const scrollToSection = (sectionId: string) => {
+    if (window.location.pathname !== environment.BASE_PATH) {
+      navigate(environment.BASE_PATH);
+
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const offset = 120;
+          const elementPosition =
+            element.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - offset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 100); // slight delay to ensure DOM is rendered
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const offset = 120;
+        const elementPosition =
+          element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }
     }
+
   };
 
   return (
@@ -135,20 +164,20 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Contact Info</h4>
             <ul className="space-y-3">
-              <li className="flex items-center space-x-2">
-                <MapPin className="text-brand-orange h-10 w-20" />
+               <li className="flex items-center gap-3">
+                <MapPin className="text-brand-orange h-6 w-6 flex-shrink-0" />
                 <span className="text-gray-400">
                   ND Diagnostics India Pvt Ltd, 2nd Floor, Coastal Chambers
                   Building, MG Road, Ravipuram, Kochi Ernakulam - 682015
                   Ph:9582-116116
                 </span>
               </li>
-              <li className="flex items-center space-x-2">
-                <Phone className="text-brand-orange h-4 w-4" />
+              <li className="flex items-center gap-3">
+                <Phone className="text-brand-orange h-6 w-6 flex-shrink-0" />
                 <span className="text-gray-400">+91 9582-116116</span>
               </li>
-              <li className="flex items-center space-x-2">
-                <Mail className="text-brand-orange h-4 w-4" />
+              <li className="flex items-center gap-3">
+                <Mail className="text-brand-orange h-6 w-6 flex-shrink-0" />
                 <a
                   href="mailto:info@ndhealthcheck.com"
                   className="text-gray-400"
