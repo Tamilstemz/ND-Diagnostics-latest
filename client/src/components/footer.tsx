@@ -199,7 +199,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col gap-3 justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
+          <div className="flex flex-row  justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
               ©2025 ND Diagnostics India Private Limited. All rights reserved.
             </p>
