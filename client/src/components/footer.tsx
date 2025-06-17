@@ -13,39 +13,60 @@ export default function Footer() {
   const [, navigate] = useLocation();
 
 
- const scrollToSection = (sectionId: string) => {
-    if (window.location.pathname !== environment.BASE_PATH) {
-      navigate(environment.BASE_PATH);
 
-      setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const offset = 120;
-          const elementPosition =
-            element.getBoundingClientRect().top + window.pageYOffset;
-          const offsetPosition = elementPosition - offset;
 
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth",
-          });
-        }
-      }, 100); // slight delay to ensure DOM is rendered
-    } else {
-      const element = document.getElementById(sectionId);
+   const scrollToSection = (sectionId: string) => {
+
+    const getDynamicOffset = (id: string): number => {
+      const header = document.getElementById(id); // updated to use ID
+      if (header) {
+        const computedStyle = getComputedStyle(header);
+        const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+        return Math.round( marginBottom + paddingBottom + 70);
+      }
+      return 100; // fallback
+    };
+
+    const getElementPosition = (element: HTMLElement): number => {
+      const rect = element.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const clientTop = document.documentElement.clientTop || 0;
+      return rect.top + scrollTop - clientTop;
+    };
+
+    const scrollWithOffset = (id: string, retries = 10) => {
+      const element = document.getElementById(id);
+      const offset = getDynamicOffset(id);
+
       if (element) {
-        const offset = 120;
-        const elementPosition =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - offset;
+        const elementTop = getElementPosition(element);
+        const offsetTop = Math.max(0, elementTop - offset);
+
 
         window.scrollTo({
-          top: offsetPosition,
+          top: offsetTop,
           behavior: "smooth",
         });
+      } else if (retries > 0) {
+        console.log(`Element #${id} not found. Retrying... (${retries})`);
+        setTimeout(() => scrollWithOffset(id, retries - 1), 300);
+      } else {
+        console.warn(`Failed to find section: #${id}`);
       }
-    }
+    };
 
+    if (window.location.pathname !== environment.BASE_PATH) {
+      navigate(environment.BASE_PATH);
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 500);
+    } else {
+      setTimeout(() => {
+        scrollWithOffset(sectionId);
+      }, 300);
+      
+    }
   };
 
   return (
@@ -125,14 +146,6 @@ export default function Footer() {
                   Home
                 </button>
               </li>
-               <li>
-                <button
-                  onClick={() => scrollToSection("services")}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  Services
-                </button>
-              </li>
               <li>
                 <button
                   onClick={() => scrollToSection("about")}
@@ -141,6 +154,15 @@ export default function Footer() {
                   About Us
                 </button>
               </li>
+               <li>
+                <button
+                  onClick={() => scrollToSection("services")}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Services
+                </button>
+              </li>
+
 
                <li>
                 <button
@@ -205,7 +227,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-row  justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
+          <div className="flex lg:flex-row md:flex-col md:gap-4 justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
               ©2025 ND Diagnostics India Private Limited. All rights reserved.
             </p>

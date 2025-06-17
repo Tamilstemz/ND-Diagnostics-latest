@@ -21,7 +21,7 @@ export default function Header() {
         const computedStyle = getComputedStyle(header);
         const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
         const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
-        return Math.round( marginBottom + paddingBottom + 16);
+        return Math.round( marginBottom + paddingBottom + 70);
       }
       return 100; // fallback
     };
@@ -109,7 +109,8 @@ export default function Header() {
       variants={headerVariants}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4 gap-y-2 md:flex-nowrap">
+        <div className="flex flex-wrap md:flex-nowrap justify-between items-center py-4 gap-y-2 w-full">
+
           <motion.div
             className="flex items-center space-x-3"
             initial={{ opacity: 0, x: -50 }}
@@ -119,29 +120,29 @@ export default function Header() {
             <motion.img
               src={logoPath}
               alt="ND Diagnostics India Logo"
-              className="h-16 sm:h-20 w-auto max-h-[60px] object-contain"
+              className="h-[80px] sm:h-[100px] w-auto object-contain"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
             />
           </motion.div>
 
           <motion.nav
-            className="hidden md:flex space-x-8"
+            className="hidden md:flex flex-grow justify-center items-center flex-wrap gap-10 whitespace-nowrap"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             {[
               { id: "home", label: "Home" },
-              { id: "services", label: "Services" },
               { id: "about", label: "About Us" },
+              { id: "services", label: "Services" },
               { id: "documents", label: "Documents Required" },
               { id: "contact", label: "Contact" },
             ].map((item, index) => (
               <motion.button
                 key={item.id}
                 onClick={() => scrollToSection(item.id)}
-                className="Navlinks text-gray-700 hover:text-brand-orange text-left block w-full font-medium transition-colors"
+                className="Navlinks text-gray-700 hover:text-brand-orange text-sm md:text-base font-medium transition-colors"
                 variants={navItemVariants}
                 initial="hidden"
                 animate="visible"
@@ -155,7 +156,7 @@ export default function Header() {
           </motion.nav>
 
           <motion.div
-            className="hidden md:flex items-center gap-4 lg:gap-6"
+            className="hidden md:flex items-center gap-3 ml-auto flex-shrink-0"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
@@ -203,6 +204,7 @@ export default function Header() {
           </motion.button>
         </div>
 
+      {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
@@ -247,7 +249,7 @@ export default function Header() {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }, 50);
                     }}
-                    className="card-gradient-orange w-full md:w-auto px-6 py-2 text-white font-medium hover:shadow-lg transition-all duration-300 border-0"
+                    className="card-gradient-orange w-full px-6 py-2 text-white font-medium hover:shadow-lg transition-all duration-300 border-0"
                   >
                     Book Appointment
                   </Button>

@@ -21,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { isSlotExpired } from "../components/commonfunctions";
+
 
 type Service = {
   id: number;
@@ -224,6 +226,8 @@ const AppointmentBooking = () => {
       slot_booking: [],
     },
   ]);
+
+
 
   console.log(formData);
 
@@ -742,8 +746,16 @@ const AppointmentBooking = () => {
 
     for (const slotItem of filteredSlotData) {
       const slotDate = slotItem.slot.date;
+     
+      const sortedTimes = [...slotItem.slot.slottime].sort((a, b) => {
+      const toMinutes = (t: string) => {
+        const [hours, minutes] = t.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+      return toMinutes(a.start_time) - toMinutes(b.start_time);
+    });
 
-      for (const time of slotItem.slot.slottime) {
+      for (const time of sortedTimes) {
         grouped[slotDate].push({
           time: `${formatTo12Hour(time.start_time)} to ${formatTo12Hour(
             time.end_time
@@ -1236,6 +1248,7 @@ const AppointmentBooking = () => {
         console.log(message);
         showToast("success", message);
         setShowDialog(false);
+        setStepIndex(0)
         setFormData({
           patientName: "",
           hapId: "",
@@ -1633,7 +1646,7 @@ const AppointmentBooking = () => {
                     }}
                     className="form-label"
                   >
-                    Center <span>:</span>
+                    Centre <span>:</span>
                   </label>
                   <select
                     style={{
@@ -1754,7 +1767,7 @@ const AppointmentBooking = () => {
                             }}
                           >
                             <span style={{ color: "gray" }}>
-                              No Service Available for selected Center
+                              No Service Available for selected Centre
                             </span>
                           </label>
                         )}
@@ -1995,7 +2008,8 @@ const AppointmentBooking = () => {
                                     disabled={
                                       slot.remaining <= 0 ||
                                       selectedServices.length === 0 ||
-                                      slot.remaining < membercount
+                                      slot.remaining < membercount ||
+                                      isSlotExpired(slot?.time,slot?.slotItem?.slot?.date) 
                                     }
                                     style={{
                                       borderRadius: "5px",
@@ -2607,6 +2621,7 @@ const AppointmentBooking = () => {
                                 }}
                                 placeholder={getDynamicPlaceholder("age")}
                                 autoComplete="off"
+                                disabled
                               />
                             </div>
                           </div>
