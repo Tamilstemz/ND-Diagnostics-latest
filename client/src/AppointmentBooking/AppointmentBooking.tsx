@@ -32,6 +32,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { isSlotExpired } from "../components/commonfunctions";
+
 
 type Service = {
   id: number;
@@ -823,7 +825,15 @@ setMembers(updatedMembers);
     for (const slotItem of filteredSlotData) {
       const slotDate = slotItem.slot.date;
 
-      for (const time of slotItem.slot.slottime) {
+      const sortedTimes = [...slotItem.slot.slottime].sort((a, b) => {
+      const toMinutes = (t: string) => {
+        const [hours, minutes] = t.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+      return toMinutes(a.start_time) - toMinutes(b.start_time);
+    });
+
+      for (const time of sortedTimes) {
         grouped[slotDate].push({
           time: `${formatTo12Hour(time.start_time)} to ${formatTo12Hour(
             time.end_time
@@ -1506,6 +1516,8 @@ const getFileNameFromUrl = (url: string) => {
         console.log(message);
         showToast("success", message);
         setShowDialog(false);
+        setStepIndex(0)
+
         setFormData({
           patientName: "",
           hapId: "",
@@ -1938,10 +1950,10 @@ console.log(file.type);
       alignItems: "center",
       justifyContent: "center",
       color: "white",
-      fontSize: "10px",
+      fontSize: "9px",
     }}
   >
-    {totaldaycount}
+    {totaldaycount === 0 ? "" : totaldaycount}
   </div>
 )}
 
@@ -1981,7 +1993,7 @@ console.log(file.type);
                     }}
                     className="form-label"
                   >
-                    Center <span>:</span>
+                    Centre <span>:</span>
                   </label>
                   <select
                     style={{
@@ -2102,7 +2114,7 @@ console.log(file.type);
                             }}
                           >
                             <span style={{ color: "gray" }}>
-                              No Service Available for selected Center
+                              No Service Available for selected Centre
                             </span>
                           </label>
                         )}
@@ -2350,7 +2362,8 @@ console.log(file.type);
                                     disabled={
                                       slot.remaining <= 0 ||
                                       selectedServices.length === 0 ||
-                                      slot.remaining < membercount
+                                      slot.remaining < membercount ||
+                                      isSlotExpired(slot?.time,slot?.slotItem?.slot?.date)
                                     }
                                     style={{
                                       borderRadius: "5px",
@@ -3152,6 +3165,7 @@ console.log(file.type);
                                 }}
                                 placeholder={getDynamicPlaceholder("age")}
                                 autoComplete="off"
+                                disabled
                               />
                             </div>
                           </div>
