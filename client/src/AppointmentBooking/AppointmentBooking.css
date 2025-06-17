@@ -24,6 +24,17 @@
   border-radius: 6px;
 }
 
+.badge-disabled {
+  background-color: grey !important;
+  color: white !important;
+  cursor: not-allowed;
+}
+
+
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
 input,
 textarea,
 select {
