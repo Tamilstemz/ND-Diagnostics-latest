@@ -96,15 +96,21 @@ export default function Footer() {
               </div>
 
               <div className="flex flex-col items-center sm:items-end">
-                  <span style={{whiteSpace:'nowrap'}} className="text-xs font-semibold text-gray-400 mb-1">
-                    Location QR
-                  </span>
-                  <img
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://www.google.com/maps?q=9.95875976972592,76.28954265262357"
-                    alt="Google Maps Location QR Code"
-                    className="w-[60px] sm:w-[70px] h-[50px] sm:h-[60px] rounded-lg bg-white/10 p-1 hover:bg-white/20 transition-all duration-300"
-                  />
+                <span
+                  style={{ whiteSpace: "nowrap" }}
+                  className="text-xs font-semibold text-gray-400 mb-1"
+                >
+                  Location QR
+                </span>
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://maps.app.goo.gl/NkSRtp3rFNMoBDFQ6"
+                  alt="Google Maps Location QR Code"
+                  className="w-[60px] sm:w-[70px] h-[50px] sm:h-[60px] rounded-lg bg-white/10 p-1 hover:bg-white/20 transition-all duration-300"
+                />
               </div>
+
+
+
             </div>
           </div>
 
@@ -176,7 +182,7 @@ export default function Footer() {
                 <MapPin className="text-brand-orange h-6 w-6 flex-shrink-0" />
                 <span className="text-gray-400">
                   ND Diagnostics India Pvt Ltd, 2nd Floor, Coastal Chambers
-                  Building, MG Road, Ravipuram, Kochi Ernakulam - 682015
+                  Building, MG Road, Ravipuram, Kochi Ernakulam,Kerala - 682015
                 </span>
               </li>
               <li className="flex items-center gap-3">

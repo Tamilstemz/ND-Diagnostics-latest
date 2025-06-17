@@ -16,10 +16,10 @@ export default function Contact() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-12 items-stretch">
           {/* Contact Info Column */}
-          <div className="space-y-6">
-            <div className="glass-effect p-4 sm:p-6 rounded-2xl shadow-lg border border-white/20">
+          <div className="space-y-6 h-full flex flex-col">
+            <div className="glass-effect p-4 sm:p-6 rounded-2xl shadow-lg border border-white/20 flex-1">
               <h3 className="text-base sm:text-xl font-bold text-brand-black mb-4">Get in Touch</h3>
 
               <div className="space-y-5">
@@ -71,8 +71,8 @@ export default function Contact() {
 
 
           {/* Map Column */}
-          <div className="space-y-8">
-            <div className="glass-effect p-6 sm:p-8 rounded-2xl shadow-lg border border-white/20">
+          <div className="space-y-8 h-full flex flex-col">
+            <div className="glass-effect p-6 sm:p-8 rounded-2xl shadow-lg border border-white/20 flex-1">
               <div className="text-center mb-6">
                 <h3 className="text-xl sm:text-2xl font-bold text-brand-black mb-2">Find Us on the Map</h3>
                 <p className="text-base sm:text-lg text-brand-black">Located in the heart of Kochi for your convenience</p>
