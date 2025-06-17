@@ -43,6 +43,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        {/* <Toaster /> */}
         <Toaster />
         <Header />
         <main className="min-h-screen bg-background">
