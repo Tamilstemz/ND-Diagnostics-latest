@@ -34,7 +34,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { isSlotExpired } from "../components/commonfunctions";
 
-
 type Service = {
   id: number;
   name: string;
@@ -409,39 +408,43 @@ const AppointmentBooking = () => {
   const bookTimeSlot = (slot: any) => {
     setStepIndex(0);
     if (selectedServices.length === 0) {
-      showToast("warning", "Select Service");
+      toast({
+        title: "Warning",
+        description: "Select Service.",
+        variant: "warn",
+        duration: 4000,
+      });
       return;
     }
 
+    if (appointmentType === "Group") {
+      if (!membercount) {
+        toast({
+          title: "Warning",
+          description: "Please enter Member's Count.",
+          variant: "warn",
+          duration: 4000,
+        });
+        return;
+      }
 
-if (appointmentType === "Group") {
-  if (!membercount) {
-    toast({
-      title: "Warning",
-      description: "Please enter Member's Count.",
-      variant: "warn",
-      duration: 4000,
-    });
-    return;
-  }
+      // ✅ Create N member objects if not already created
+      if (members.length !== membercount) {
+        const emptyMembers = Array.from({ length: membercount }, (_, i) => ({
+          patientName: "",
+          email: "",
+          contactNumber: "",
+          alternativeNumber: "",
+          age: "",
+          dob: "",
+          passportNo: "",
+          gender: "",
+          slot_booking: [],
+        }));
+        setMembers(emptyMembers);
+      }
+    }
 
-  // ✅ Create N member objects if not already created
-  if (members.length !== membercount) {
-    const emptyMembers = Array.from({ length: membercount }, (_, i) => ({
-      patientName: "",
-      email: "",
-      contactNumber: "",
-      alternativeNumber: "",
-      age: "",
-      dob: "",
-      passportNo: "",
-      gender: "",
-      slot_booking: [],
-    }));
-    setMembers(emptyMembers);
-  }
-}
-    
     if (!slot.available) return;
     const slotDateStr = slot.slotItem.slot.date; // "YYYY-MM-DD"
     const slotDateObj = new Date(slotDateStr);
@@ -464,12 +467,11 @@ if (appointmentType === "Group") {
 
     // Update only if it's a group appointment
     if (appointmentType === "Group") {
-     const updatedMembers = members.map((member) => ({
-  ...member,
-  slot_booking: [...member.slot_booking, slotData],
-}));
-setMembers(updatedMembers);
-
+      const updatedMembers = members.map((member) => ({
+        ...member,
+        slot_booking: [...member.slot_booking, slotData],
+      }));
+      setMembers(updatedMembers);
     }
   };
 
@@ -826,12 +828,12 @@ setMembers(updatedMembers);
       const slotDate = slotItem.slot.date;
 
       const sortedTimes = [...slotItem.slot.slottime].sort((a, b) => {
-      const toMinutes = (t: string) => {
-        const [hours, minutes] = t.split(":").map(Number);
-        return hours * 60 + minutes;
-      };
-      return toMinutes(a.start_time) - toMinutes(b.start_time);
-    });
+        const toMinutes = (t: string) => {
+          const [hours, minutes] = t.split(":").map(Number);
+          return hours * 60 + minutes;
+        };
+        return toMinutes(a.start_time) - toMinutes(b.start_time);
+      });
 
       for (const time of sortedTimes) {
         grouped[slotDate].push({
@@ -876,46 +878,43 @@ setMembers(updatedMembers);
 
   const today = new Date().toISOString().split("T")[0];
 
-const downloadPDFsSilently = async (urls: string[]) => {
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        redirect: "follow",
-       
-      });
+  const downloadPDFsSilently = async (urls: string[]) => {
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          redirect: "follow",
+        });
 
-      if (!response.ok) {
-        console.error(`Failed to fetch: ${url}`);
-        continue;
+        if (!response.ok) {
+          console.error(`Failed to fetch: ${url}`);
+          continue;
+        }
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `invoice-${url.split("/").pop()}.pdf`; // e.g., invoice-4068.pdf
+        link.style.display = "none";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        window.URL.revokeObjectURL(blobUrl);
+        await new Promise((r) => setTimeout(r, 500)); // slight delay to ensure one-by-one download
+      } catch (error) {
+        console.error("Error downloading PDF:", error);
       }
-
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `invoice-${url.split("/").pop()}.pdf`; // e.g., invoice-4068.pdf
-      link.style.display = "none";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      window.URL.revokeObjectURL(blobUrl);
-      await new Promise((r) => setTimeout(r, 500)); // slight delay to ensure one-by-one download
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
     }
-  }
-};
+  };
 
-
-const getFileNameFromUrl = (url: string) => {
-  const id = url.split("/").pop();
-  return `invoice-${id}.pdf`;
-};
-
+  const getFileNameFromUrl = (url: string) => {
+    const id = url.split("/").pop();
+    return `invoice-${id}.pdf`;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -1484,59 +1483,48 @@ const getFileNameFromUrl = (url: string) => {
       );
 
       const responseData = res.data.data;
-      console.log("responseData :", responseData);
-      const invoiceUrls1: any[] = [];
-      const allSuccessful = responseData.every((applicant: any) => {
-        const appointments = applicant?.appointments;
-        const booking = appointments?.bookings?.[0];
+      console.log("responseData :", res);
+      if (res.data.status === "success") {
+        const invoiceUrls1: any[] = [];
+        const allSuccessful = responseData.every((applicant: any) => {
+          const appointments = applicant?.appointments;
+          const booking = appointments?.bookings?.[0];
 
-        if (
-          appointments?.status === "success" &&
-          appointments.errors?.length === 0 &&
-          booking?.appointment_id
-        ) {
-          const appointmentId = booking.appointment_id;
-          invoiceUrls1.push(
-            `https://ndhealthcheck.com/appointment-service/transaction/invoice/pdf/${appointmentId}`
-          );
-          return true;
-        }
+          if (
+            appointments?.status === "success" &&
+            appointments.errors?.length === 0 &&
+            booking?.appointment_id
+          ) {
+            const appointmentId = booking.appointment_id;
+            invoiceUrls1.push(
+              `https://ndhealthcheck.com/appointment-service/transaction/invoice/pdf/${appointmentId}`
+            );
+            return true;
+          }
 
-        return false;
-      });
-      setinvoiceUrls(invoiceUrls1);
-      downloadPDFsSilently(invoiceUrls1);
-      if (allSuccessful) {
-        const firstBooking = responseData[0]?.appointments?.bookings?.[0];
-        const applicantNumber = responseData[0]?.applicant_number;
-        const bookedDate = firstBooking?.date;
-        const bookedTime = firstBooking?.time;
-
-        const message = `✅ Applicant ${applicantNumber} booked on ${bookedDate} at ${bookedTime}`;
-        console.log(message);
-        showToast("success", message);
-        setShowDialog(false);
-        setStepIndex(0)
-
-        setFormData({
-          patientName: "",
-          hapId: "",
-          email: "",
-          contactNumber: "",
-          alternativeNumber: "",
-          gender: "",
-          age: "",
-          visaCategory: "",
-          passportNo: "",
-          paymentPreference: "",
-          paymentMethod: "QR",
-          dob: "",
-          TransactionId: "",
-          servicecode: [environment.DEFAULT_SERVICE_CODE],
-          totalPrice: 0,
+          return false;
         });
-        setMembers([
-          {
+        setinvoiceUrls(invoiceUrls1);
+        downloadPDFsSilently(invoiceUrls1);
+        if (allSuccessful) {
+          const firstBooking = responseData[0]?.appointments?.bookings?.[0];
+          const applicantNumber = responseData[0]?.applicant_number;
+          const bookedDate = firstBooking?.date;
+          const bookedTime = firstBooking?.time;
+
+          const message = `✅ Applicant ${applicantNumber} booked on ${bookedDate} at ${bookedTime}`;
+          console.log(message);
+          // showToast("success", message);
+          toast({
+            title: "success",
+            description: message,
+            variant: "success",
+            duration: 4000,
+          });
+          setShowDialog(false);
+          setStepIndex(0);
+
+          setFormData({
             patientName: "",
             hapId: "",
             email: "",
@@ -1547,20 +1535,51 @@ const getFileNameFromUrl = (url: string) => {
             visaCategory: "",
             passportNo: "",
             paymentPreference: "",
-            paymentMethod: "",
+            paymentMethod: "QR",
             dob: "",
             TransactionId: "",
             servicecode: [environment.DEFAULT_SERVICE_CODE],
             totalPrice: 0,
-            slot_booking: [],
-          },
-        ]);
-        setSelectedService("");
-        setUpcomingDatesWithSlots([]);
-        setSelectedDate(null);
-        setselectedslottime("");
+          });
+          setMembers([
+            {
+              patientName: "",
+              hapId: "",
+              email: "",
+              contactNumber: "",
+              alternativeNumber: "",
+              gender: "",
+              age: "",
+              visaCategory: "",
+              passportNo: "",
+              paymentPreference: "",
+              paymentMethod: "",
+              dob: "",
+              TransactionId: "",
+              servicecode: [environment.DEFAULT_SERVICE_CODE],
+              totalPrice: 0,
+              slot_booking: [],
+            },
+          ]);
+          setSelectedService("");
+          setUpcomingDatesWithSlots([]);
+          setSelectedDate(null);
+          setselectedslottime("");
+        } else {
+          toast({
+            title: "error",
+            description: "Some applicant bookings failed",
+            variant: "error",
+            duration: 4000,
+          });
+        }
       } else {
-        // toast.error("Some applicant bookings failed.");
+        toast({
+          title: "warning",
+          description: "Already There",
+          variant: "warn",
+          duration: 4000,
+        });
       }
 
       // ✅ You can now use `invoiceUrls` wherever needed
@@ -1573,66 +1592,73 @@ const getFileNameFromUrl = (url: string) => {
     }
   };
 
-const cancel = () => {
-  setFormErrors({});
-  setShowDialog(false);
+  const cancel = () => {
+    setFormErrors({});
+    setShowDialog(false);
 
-  // Reset self form
-  setFormData({
-    patientName: "",
-    hapId: "",
-    email: "",
-    contactNumber: "",
-    alternativeNumber: "",
-    gender: "",
-    age: "",
-    visaCategory: "",
-    passportNo: "",
-    paymentPreference: "",
-    paymentMethod: "QR",
-    dob: "",
-    TransactionId: "",
-    servicecode: [environment.DEFAULT_SERVICE_CODE],
-    totalPrice: 0,
-  });
+    // Reset self form
+    setFormData({
+      patientName: "",
+      hapId: "",
+      email: "",
+      contactNumber: "",
+      alternativeNumber: "",
+      gender: "",
+      age: "",
+      visaCategory: "",
+      passportNo: "",
+      paymentPreference: "",
+      paymentMethod: "QR",
+      dob: "",
+      TransactionId: "",
+      servicecode: [environment.DEFAULT_SERVICE_CODE],
+      totalPrice: 0,
+    });
 
-  // Dynamically generate `membercount` empty members
-  const count = membercount || 1; // fallback to 1 if count not set
-  const emptyMember = {
-    patientName: "",
-    hapId: "",
-    email: "",
-    contactNumber: "",
-    alternativeNumber: "",
-    gender: "",
-    age: "",
-    visaCategory: "",
-    passportNo: "",
-    paymentPreference: "",
-    paymentMethod: "QR",
-    dob: "",
-    TransactionId: "",
-    servicecode: [environment.DEFAULT_SERVICE_CODE],
-    totalPrice: 0,
-    slot_booking: [],
+    // Dynamically generate `membercount` empty members
+    const count = membercount || 1; // fallback to 1 if count not set
+    const emptyMember = {
+      patientName: "",
+      hapId: "",
+      email: "",
+      contactNumber: "",
+      alternativeNumber: "",
+      gender: "",
+      age: "",
+      visaCategory: "",
+      passportNo: "",
+      paymentPreference: "",
+      paymentMethod: "QR",
+      dob: "",
+      TransactionId: "",
+      servicecode: [environment.DEFAULT_SERVICE_CODE],
+      totalPrice: 0,
+      slot_booking: [],
+    };
+
+    const emptyMembersArray = Array.from({ length: count }, () => ({
+      ...emptyMember,
+    }));
+    setMembers(emptyMembersArray);
+
+    setStepIndex(0);
   };
 
-  const emptyMembersArray = Array.from({ length: count }, () => ({ ...emptyMember }));
-  setMembers(emptyMembersArray);
-
-  setStepIndex(0);
-};
-
-const handleFileChange = (e: any) => {
+  const handleFileChange = (e: any) => {
     const file = e.target.files[0];
 
     if (!file) {
       setHelperText("");
       return;
     }
-console.log(file.type);
+    console.log(file.type);
 
-    const allowedTypes = ["image/png", "application/pdf", "image/jpeg", "image/jpg"];
+    const allowedTypes = [
+      "image/png",
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+    ];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
@@ -1645,8 +1671,6 @@ console.log(file.type);
       setHelperText("File is valid.");
     }
   };
-
-
 
   useEffect(() => {
     if (serviceList.length > 0 && selectedCenter) {
@@ -1800,41 +1824,43 @@ console.log(file.type);
                     ›
                   </button>
                 </div>
-                
               </div>
             </div>
-                        <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              {/* Slot Closed - Red X Icon */}
+              <div
+                className="flex items-center gap-2"
+                style={{
+                  padding: "0px 10px 10px",
+                }}
+              >
+                <div
+                  className="bg-red-500 rounded-full"
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                  }}
+                ></div>
+                <span className="text-sm text-gray-700">Slot Closed</span>
+              </div>
 
-  {/* Slot Closed - Red X Icon */}
-  <div className="flex items-center gap-2" style={{
-    padding: '0px 10px 10px'
-  }}>
-  <div
-    className="bg-red-500 rounded-full"
-    style={{
-      width: "15px",
-      height: "15px",
-    }}
-  ></div>
-  <span className="text-sm text-gray-700">Slot Closed</span>
-</div>
-
-
-  {/* Available - Green Check Icon */}
-  <div className="flex items-center gap-2"  style={{
-    padding: '0px 10px 10px'
-  }}> 
-  <div
-    className="bg-green-500 rounded-full"
-    style={{
-      width: "15px",
-      height: "15px",
-    }}
-  ></div>
-  <span className="text-sm text-gray-700">Slot Available</span>
-</div>
-
-</div>
+              {/* Available - Green Check Icon */}
+              <div
+                className="flex items-center gap-2"
+                style={{
+                  padding: "0px 10px 10px",
+                }}
+              >
+                <div
+                  className="bg-green-500 rounded-full"
+                  style={{
+                    width: "15px",
+                    height: "15px",
+                  }}
+                ></div>
+                <span className="text-sm text-gray-700">Slot Available</span>
+              </div>
+            </div>
 
             <div
               className="card-body p-4"
@@ -1937,26 +1963,26 @@ console.log(file.type);
                           {day.getDate()}
 
                           {hasSlot && (
-  <div
-    style={{
-      position: "absolute",
-      top: "24px",
-      left: "24px",
-      width: "15px",
-      height: "15px",
-      borderRadius: "50%",
-      backgroundColor: totaldaycount === 0 ? "red" : "#28a745", // 🔴 red if 0, ✅ green otherwise
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "white",
-      fontSize: "9px",
-    }}
-  >
-    {totaldaycount === 0 ? "" : totaldaycount}
-  </div>
-)}
-
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "24px",
+                                left: "24px",
+                                width: "15px",
+                                height: "15px",
+                                borderRadius: "50%",
+                                backgroundColor:
+                                  totaldaycount === 0 ? "red" : "#28a745", // 🔴 red if 0, ✅ green otherwise
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "white",
+                                fontSize: "9px",
+                              }}
+                            >
+                              {totaldaycount === 0 ? "" : totaldaycount}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -2363,7 +2389,10 @@ console.log(file.type);
                                       slot.remaining <= 0 ||
                                       selectedServices.length === 0 ||
                                       slot.remaining < membercount ||
-                                      isSlotExpired(slot?.time,slot?.slotItem?.slot?.date)
+                                      isSlotExpired(
+                                        slot?.time,
+                                        slot?.slotItem?.slot?.date
+                                      )
                                     }
                                     style={{
                                       borderRadius: "5px",
@@ -3294,38 +3323,51 @@ console.log(file.type);
                             </label>{" "}
                             <span>&#8377; {formData?.totalPrice}</span>
                           </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "85%",
-          fontWeight: "bold",
-        }}
-      >
-        Upload Transaction file<span>:</span>
-      </label>
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        <Input
-          style={{ width: "183px", cursor: "pointer" }}
-          type="file"
-          accept=".png,.pdf"
-          onChange={handleFileChange}
-        />
-        {helperText && (
-          <span
-            style={{
-              fontSize: "12px",
-              color: helperText.includes("valid") ? "green" : "#dc2626", // red for warnings
-              marginTop: "4px",
-            }}
-          >
-            {helperText}
-          </span>
-        )}
-      </div>
-    </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <label
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: "85%",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Upload Transaction file<span>:</span>
+                            </label>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
+                              <Input
+                                style={{ width: "183px", cursor: "pointer" }}
+                                type="file"
+                                accept=".png,.pdf"
+                                onChange={handleFileChange}
+                              />
+                              {helperText && (
+                                <span
+                                  style={{
+                                    fontSize: "12px",
+                                    color: helperText.includes("valid")
+                                      ? "green"
+                                      : "#dc2626", // red for warnings
+                                    marginTop: "4px",
+                                  }}
+                                >
+                                  {helperText}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           <div
                             style={{
                               display: "flex",
