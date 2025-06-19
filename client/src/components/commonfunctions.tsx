@@ -1,6 +1,6 @@
 export const isSlotExpired = (slotTimeStr: string, slotDateStr: string): boolean => {
   const now = new Date();
-  // console.log('slotDateStr--oooo',slotDateStr);
+  // console.log('slots--oooo',slotDateStr,'-----',slotTimeStr);
   
   // Extract start time
   const [startTimeStr] = slotTimeStr.split(" to ");

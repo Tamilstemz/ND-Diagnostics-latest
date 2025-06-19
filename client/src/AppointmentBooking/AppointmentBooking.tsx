@@ -343,10 +343,38 @@ const AppointmentBooking = () => {
 
   const totalcount = (day: Date) => {
     const dateStr = formatDateToYYYYMMDD(day);
-    console.log("Date:", dateStr);
+    // console.log("Date:", dateStr);
+    // console.log('timeSlots-----',timeSlots);
 
-    const matchedSlots = timeSlots.filter((i) => i.slot?.date === dateStr);
-    console.log("Matched Slots:", matchedSlots);
+    const today = new Date();
+    const formattedToday = today.toISOString().split('T')[0]; // e.g., "2025-06-19"
+    // console.log("Today:", formattedToday);
+    
+    if (dateStr >= formattedToday) {
+      const matchedSlots = timeSlots.filter((i) => i.slot?.date === dateStr);
+
+      let checktimeing = true;
+
+      matchedSlots.forEach((ele, ind) => {
+        // console.log('fffff1111', ele.slot.date);
+
+        ele.slot.slottime.forEach((time:any ) => {
+          const timeRange = `${formatTo12Hour(time.start_time)} to ${formatTo12Hour(time.end_time)}`;
+          // console.log('fffff2222', timeRange);
+
+          // Check expiration for each time slot
+          const isExpired = isSlotExpired(timeRange, ele.slot.date);
+
+          if (isExpired) {
+            // console.log('meeee---',timeRange, ele.slot.date);
+            
+            checktimeing = false; 
+          }
+        });
+      });
+
+
+      // console.log("Matched Slots:", matchedSlots);
 
     const seenSlots = new Set<string>();
     let totalRemaining = 0;
@@ -363,8 +391,9 @@ const AppointmentBooking = () => {
       });
     });
 
-    console.log("Total Remaining (No Duplicates):", totalRemaining);
-    return totalRemaining;
+    // console.log("Total Remaining (No Duplicates):", totalRemaining);
+    return !checktimeing ? 0 : totalRemaining ;
+    }
   };
 
   const isTimeSlotBooked = (date: Date, timeSlot: string): boolean => {
@@ -815,55 +844,74 @@ const AppointmentBooking = () => {
   };
 
   const handleDateClick = (day: Date, rawSlots: any[]) => {
-    if (isPastDate(day)) return;
+  if (day && isPastDate(day)) return;
+  console.log('ttttt----',day);
+  
+  setSelectedDate(day);
 
-    setSelectedDate(day);
+  console.log('Selected day:', day);
 
-    const selectedDates: string[] = [];
-    const selectedDateStringsSet = new Set<string>();
+  const selectedDates: string[] = [];
+  const selectedDateStringsSet = new Set<string>();
 
-    for (let i = 0; i < 4; i++) {
-      const newDate = new Date(day.getTime());
-      newDate.setDate(day.getDate() + i);
-      const dateStr = formatDateToYYYYMMDD(newDate);
+  let currentDate = new Date(day.getTime());
+  let count = 0;
+
+  // ✅ Skip Sundays and get next 4 valid days
+  while (count < 4) {
+    if (currentDate.getDay() !== 0) { // Skip Sunday
+      const dateStr = formatDateToYYYYMMDD(currentDate);
       selectedDates.push(dateStr);
       selectedDateStringsSet.add(dateStr);
+
+      console.log("Valid Date:", currentDate);
+      count++;
     }
 
-    const grouped: Record<string, any[]> = {};
-    selectedDates.forEach((date) => {
-      grouped[date] = [];
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  console.log('Selected Dates Set:', selectedDateStringsSet);
+
+  // Initialize grouped data
+  const grouped: Record<string, any[]> = {};
+  selectedDates.forEach((date) => {
+    grouped[date] = [];
+  });
+
+  // Filter relevant slot data
+  const filteredSlotData = rawSlots.filter((slotItem: any) =>
+    selectedDateStringsSet.has(slotItem.slot.date)
+  );
+
+  console.log('Filtered Slot Data:', filteredSlotData);
+
+  // Group and sort slots
+  for (const slotItem of filteredSlotData) {
+    const slotDate = slotItem.slot.date;
+
+    const sortedTimes = [...slotItem.slot.slottime].sort((a, b) => {
+      const toMinutes = (t: string) => {
+        const [hours, minutes] = t.split(":").map(Number);
+        return hours * 60 + minutes;
+      };
+      return toMinutes(a.start_time) - toMinutes(b.start_time);
     });
 
-    const filteredSlotData = rawSlots.filter((slotItem: any) =>
-      selectedDateStringsSet.has(slotItem.slot.date)
-    );
-
-    for (const slotItem of filteredSlotData) {
-      const slotDate = slotItem.slot.date;
-
-      const sortedTimes = [...slotItem.slot.slottime].sort((a, b) => {
-        const toMinutes = (t: string) => {
-          const [hours, minutes] = t.split(":").map(Number);
-          return hours * 60 + minutes;
-        };
-        return toMinutes(a.start_time) - toMinutes(b.start_time);
+    for (const time of sortedTimes) {
+      grouped[slotDate].push({
+        time: `${formatTo12Hour(time.start_time)} to ${formatTo12Hour(time.end_time)}`,
+        available: time.available,
+        remaining: time.remaining,
+        slotItem,
       });
-
-      for (const time of sortedTimes) {
-        grouped[slotDate].push({
-          time: `${formatTo12Hour(time.start_time)} to ${formatTo12Hour(
-            time.end_time
-          )}`,
-          available: time.available,
-          remaining: time.remaining,
-          slotItem,
-        });
-      }
     }
+  }
 
-    setSlotsGroupedByDate(grouped);
-  };
+  // Set grouped slots to state
+  setSlotsGroupedByDate(grouped);
+};
+
 
   // Format date to yyyy-mm-dd
   const formatDate = (date: Date) => date.toISOString().split("T")[0];
@@ -1735,11 +1783,18 @@ const AppointmentBooking = () => {
     return resultDates;
   };
 
+  
+
   const isWithin90DaysFromToday = (date: Date): boolean => {
     const today = new Date();
+    // console.log('meeeee-1111',today,'777777',date);
+    
     const ninetyDaysLater = new Date();
     ninetyDaysLater.setDate(today.getDate() + 90);
-    return date >= today && date <= ninetyDaysLater;
+
+    console.log('meeeee-2222',date ,'eeeeee',date <= ninetyDaysLater);
+
+    return  date <= ninetyDaysLater;
   };
 
 
@@ -1795,7 +1850,7 @@ const AppointmentBooking = () => {
         updatedData.hapId = value;
       }
 
-      console.log('updatedData-------',updatedData);
+      // console.log('updatedData-------',updatedData);
       
       setFormData(updatedData);
 
@@ -1806,7 +1861,7 @@ const AppointmentBooking = () => {
         return updatedErrors;
       });
 
-      console.log('formData-----',formData);
+      // console.log('formData-----',formData);
       
     } else if (appointmentType === "Group" && typeof index === "number") {
       const updatedMembers = [...members];
@@ -1974,24 +2029,23 @@ const AppointmentBooking = () => {
                     const selected = isSelected(day);
                     const hasSlot = hasEvent(day);
                     const totaldaycount = totalcount(day);
-                    console.log(hasSlot);
+                    // console.log('meeeeee-99999',day,hasSlot,'totaldaycount',totaldaycount);
                     console.log(totaldaycount);
 
                     const currentMonth = isCurrentMonth(day);
-
+                    // console.log('totaldaycount---------',day,'day',totaldaycount);
+                    
                     const isDisabled =
                       isPastDate(day) || // Disable past
                       day.getDay() === 0 || // Disable Sundays
-                      !isWithin90DaysFromToday(day) || // Disable if not in next 90 days
-                      !selectedCenter || // Disable if no center
-                      totaldaycount === 0; // Disable if no available slots
+                      !isWithin90DaysFromToday(day)  || // Disable if not in next 90 days
+                      (totaldaycount === 0 && hasSlot ) // Disable if no available slots
 
                     const dayStyle: React.CSSProperties = {
                       opacity: isDisabled ? 0.5 : 1,
                       border: isDisabled ? "1px solid #ccc" : "none",
                       cursor: isDisabled ? "not-allowed" : "pointer",
-                      backgroundColor: today
-                        ? "#fe9647" : "transparent",
+                      // backgroundColor: today ? "#fe9647" : "transparent",
 
                     };
 
@@ -2302,11 +2356,16 @@ const AppointmentBooking = () => {
 
                     const sortedSlotDates = getNextFourNonSundayDates(selected);
 
+                    // console.log('slots------?????',sortedSlotDates,'777777',slotsGroupedByDate);
+                    
+
                     return sortedSlotDates.map((date) => {
                       const dateKey = Object.keys(slotsGroupedByDate).find(
                         (key) =>
                           new Date(key).toDateString() === date.toDateString()
                       );
+                      // console.log('slots------?????-2222',dateKey);
+                      
                       const slots = dateKey
                         ? Array.from(
                           new Map(
@@ -2317,7 +2376,8 @@ const AppointmentBooking = () => {
                           ).values()
                         )
                         : [];
-
+                      // console.log('slots----------',slots);
+                      
                       return (
                         <div
                           key={dateKey}
@@ -2350,8 +2410,10 @@ const AppointmentBooking = () => {
                             </h5>
                           </div>
 
-                          {slots.some((ele)=> ele?.remaining > 0) && slots.length > 0 ? (
-                            <div
+                         {slots.length > 0 &&
+                          slots.some((ele) => ele?.remaining > 0) &&
+                          slots.some((ele) => ele?.remaining > 0 && !isSlotExpired(ele?.time, ele?.slotItem?.slot?.date)) ? 
+                          (<div
                               className="row g-3 px-2"
                               style={{
                                 display: "flex",
@@ -2360,7 +2422,7 @@ const AppointmentBooking = () => {
                                 padding: "10px 10px"
                               }}
                             >
-                              {slots.filter((ele)=> ele?.remaining > 0).map((slot: any, idx: number) => (
+                              {slots.map((slot: any, idx: number) => (
                                 <div
                                   key={idx} className="col-12 col-sm-6 col-md-4 mb-3 position-relative">
                                     <>
@@ -2384,8 +2446,7 @@ const AppointmentBooking = () => {
                                         onClick={() => bookTimeSlot(slot)}
                                         disabled={
                                           slot.remaining < membercount ||
-                                          selectedServices.length === 0 ||
-                                          isSlotExpired(slot?.time, slot?.slotItem?.slot?.date)
+                                          selectedServices.length === 0 
                                         }
                                         style={{
                                           borderRadius: "5px",
