@@ -24,6 +24,36 @@
   border-radius: 6px;
 }
 
+/* Global input placeholder style */
+input::placeholder {
+  color: #888;
+  font-size: 0.8rem;
+  opacity: 1; /* ensures it's fully visible */
+}
+
+/* Optional: for textarea too */
+textarea::placeholder {
+  color: #888;
+  font-style: italic;
+  font-size: 0.2rem;
+  opacity: 1;
+}
+
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.input-shake {
+  animation: shake 0.3s ease-in-out;
+   outline: none
+}
+
+
 .badge-disabled {
   background-color: grey !important;
   color: white !important;
@@ -41,7 +71,7 @@ select {
   outline: none;
   border: 1px solid #ccc;
   padding: 8px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   border-radius: 4px;
   transition: all 0.3s ease;
 }
@@ -61,11 +91,49 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+select {
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Focus effect */
+select:focus {
+  outline: none;
+  border-color: #2563eb; /* Tailwind's blue-600 */
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+/* Disabled select */
+select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Style each option inside the dropdown */
+select option {
+  font-size: 12px;
+  padding: 5px 10px;
+  background-color: rgb(244, 242, 242);
+  color: black;
+}
+
+/* Optional: hover effect on option (works only on some browsers like Firefox) */
+select option:hover {
+  background-color: #f0f0f0;
+}
+
 
 /* For Firefox */
-input[type="number"] {
+/* input[type="number"] {
   -moz-appearance: textfield;
-}
+} */
 
 .btn-custom-orange {
   border: none;

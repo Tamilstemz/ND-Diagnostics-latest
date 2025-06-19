@@ -33,6 +33,16 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { isSlotExpired } from "../components/commonfunctions";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog"; // adjust path as per your file
 
 type Service = {
   id: number;
@@ -159,16 +169,17 @@ type FormDataType = {
   TransactionId: string;
   servicecode: string[]; // ← Explicitly typed as string[]
   totalPrice: number;
+  PaymentType: string;
 };
 
 const AppointmentBooking = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  console.log(selectedDate);
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState("month");
   const [center, setcenter] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [opennewdialog, setopennewdialog] = useState(false);
   const [showDialog1, setShowDialog1] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedCenter, setSelectedCenter] = useState("NDK");
@@ -191,7 +202,6 @@ const AppointmentBooking = () => {
   const [slotsData, setSlotsData] = useState<SlotsDataMap>({});
   const calendarSlotMap: { [key: string]: any[] } = {};
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
-  console.log(timeSlots);
   const [membercount, setmembercount] = useState(0);
   const [bookedEvents, setBookedEvents] = useState<CalendarEvent[]>([]);
   const [dotDates, setDotDates] = useState<Set<string>>(new Set());
@@ -203,7 +213,7 @@ const AppointmentBooking = () => {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [selectedslottime, setselectedslottime] = useState("");
   const [invoiceUrls, setinvoiceUrls] = useState<any[]>([]);
-
+  const [existingapplicantdata, setexistingapplicantdata] = useState<any>({});
   const [formData, setFormData] = useState<FormDataType>({
     patientName: "",
     hapId: "",
@@ -220,6 +230,7 @@ const AppointmentBooking = () => {
     TransactionId: "",
     servicecode: [environment.DEFAULT_SERVICE_CODE],
     totalPrice: 0,
+    PaymentType: "",
   });
   const [members, setMembers] = useState<any[]>([
     {
@@ -239,6 +250,7 @@ const AppointmentBooking = () => {
       servicecode: [environment.DEFAULT_SERVICE_CODE],
       totalPrice: 0,
       slot_booking: [],
+      PaymentType: "",
     },
   ]);
   const [memberValidated, setMemberValidated] = useState<boolean[]>(() =>
@@ -248,7 +260,6 @@ const AppointmentBooking = () => {
   const [memberHasError, setMemberHasError] = useState<boolean[]>(() =>
     Array(members.length).fill(false)
   );
-  console.log(formData);
 
   useEffect(() => {
     if (selectedCenter) {
@@ -330,10 +341,8 @@ const AppointmentBooking = () => {
 
   const totalcount = (day: Date) => {
     const dateStr = formatDateToYYYYMMDD(day);
-    console.log("Date:", dateStr);
 
     const matchedSlots = timeSlots.filter((i) => i.slot?.date === dateStr);
-    console.log("Matched Slots:", matchedSlots);
 
     const seenSlots = new Set<string>();
     let totalRemaining = 0;
@@ -350,7 +359,6 @@ const AppointmentBooking = () => {
       });
     });
 
-    console.log("Total Remaining (No Duplicates):", totalRemaining);
     return totalRemaining;
   };
 
@@ -416,6 +424,7 @@ const AppointmentBooking = () => {
       });
       return;
     }
+    console.log(membercount);
 
     if (appointmentType === "Group") {
       if (!membercount) {
@@ -485,11 +494,6 @@ const AppointmentBooking = () => {
   };
 
   const scheduleAppointment = () => {
-    console.log("Scheduling appointment:", {
-      ...formData,
-      slot: selectedSlot,
-      date: selectedDate,
-    });
     closeDialog();
   };
 
@@ -532,8 +536,6 @@ const AppointmentBooking = () => {
   };
 
   const parseTimeSlotsFromData = (data: any[]) => {
-    console.log("Slot data:", data);
-
     const parsedSlots: {
       [key: string]: { time: string; available: boolean; booked: boolean }[];
     } = {};
@@ -586,7 +588,6 @@ const AppointmentBooking = () => {
     (async () => {
       try {
         const res = await httpClient.get(environment.AVAILABLE_CENTER_API);
-        console.log(res.data.data);
 
         setcenter(res.data.data || []);
       } catch (err) {
@@ -614,6 +615,7 @@ const AppointmentBooking = () => {
       TransactionId: "",
       servicecode: [environment.DEFAULT_SERVICE_CODE],
       totalPrice: 0,
+      PaymentType: "",
     });
     setMembers([
       {
@@ -726,8 +728,6 @@ const AppointmentBooking = () => {
     }
   };
 
-  console.log(selectedServices);
-
   const handleCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     code: string,
@@ -740,10 +740,8 @@ const AppointmentBooking = () => {
     } else {
       updatedSelected = selectedServices.filter((c) => c !== code);
     }
-    console.log(updatedSelected);
 
     setSelectedServices(updatedSelected);
-    console.log(appointmentType);
 
     // Update all members if appointment type is Group
     if (appointmentType === "Group") {
@@ -756,7 +754,6 @@ const AppointmentBooking = () => {
     } else {
       updateFormDataWithServices(updatedSelected);
     }
-    console.log(members);
   };
 
   const updateFormDataWithServices = (selectedCodes: string[]) => {
@@ -992,7 +989,6 @@ const AppointmentBooking = () => {
         return updatedErrors;
       });
     }
-    console.log(members);
   };
 
   const getYesterdayDate = (): string => {
@@ -1184,6 +1180,16 @@ const AppointmentBooking = () => {
           hasError = true;
         }
 
+        if (index === 0) {
+          if (!contactNumber.trim()) {
+            errors[`contactNumber_${index}`] = "Contact Number is required.";
+            hasError = true;
+          } else if (!/^\d{10}$/.test(contactNumber)) {
+            errors[`contactNumber_${index}`] = "Must be exactly 10 digits.";
+            hasError = true;
+          }
+        }
+
         if (!gender.trim()) {
           errors[`gender_${index}`] = "Gender is required.";
           hasError = true;
@@ -1313,35 +1319,67 @@ const AppointmentBooking = () => {
     return today.toISOString().split("T")[0];
   };
 
+  // const [members, setMembers] = useState<any[]>([]); // Adjust type if needed
+  const [errorMessage, setErrorMessage] = useState("");
+
   const handleMemberCountChange = (e: any) => {
-    const count = parseInt(e.target.value, 10);
-    setmembercount(count);
-    console.log(members);
+    const rawValue = e.target.value;
 
-    const servicedetail = members[0]?.servicecode;
-    console.log(servicedetail);
+    // Reject decimals, zero, empty, or more than 2 digits
+    if (
+      rawValue.includes(".") ||
+      rawValue === "0" ||
+      rawValue === "" ||
+      rawValue.length > 2
+    ) {
+      triggerShake();
+      setmembercount(0);
+      return;
+    }
 
-    const updatedMembers = Array.from({ length: count }, (_, i) => ({
-      patientName: "",
-      hapId: "",
-      email: "",
-      contactNumber: "",
-      alternativeNumber: "",
-      gender: "",
-      age: "",
-      visaCategory: "",
-      passportNo: "",
-      paymentPreference: "",
-      paymentMethod: "QR",
-      dob: "",
-      TransactionId: "",
-      servicecode: servicedetail,
-      totalPrice: 0,
-      slot_booking: [],
-    }));
+    const value = parseInt(rawValue, 10);
 
-    setMembers(updatedMembers);
+    if (!isNaN(value) && value >= 2 && value <= 5) {
+      setmembercount(value);
+
+      const servicedetail = members[0]?.servicecode;
+
+      const updatedMembers = Array.from({ length: value }, () => ({
+        patientName: "",
+        hapId: "",
+        email: "",
+        contactNumber: "",
+        alternativeNumber: "",
+        gender: "",
+        age: "",
+        visaCategory: "",
+        passportNo: "",
+        paymentPreference: "",
+        paymentMethod: "QR",
+        dob: "",
+        TransactionId: "",
+        servicecode: servicedetail,
+        totalPrice: 0,
+        slot_booking: [],
+      }));
+
+      setMembers(updatedMembers);
+    } else {
+      triggerShake();
+      setmembercount(0);
+    }
   };
+  const [shake, setShake] = useState(false);
+  const triggerShake = () => {
+    setShake(true);
+    setErrorMessage("Count must be between 2 and 5");
+
+    setTimeout(() => {
+      setShake(false);
+      setErrorMessage(""); // clear message
+    }, 1000); // display error for 2 seconds
+  };
+
   const clear = () => {
     if (stepIndex === 0) {
       setFormData((prev) => ({
@@ -1394,7 +1432,7 @@ const AppointmentBooking = () => {
       );
     }
     setFormErrors({});
-
+ setMemberHasError(Array(members.length).fill(false));
     // Clear only personal details in members (assumes 1 member initially)
   };
 
@@ -1402,6 +1440,16 @@ const AppointmentBooking = () => {
     try {
       if (!selectedDate || !selectedSlot) {
         // toast.error("Please select a date and slot before submitting.");
+        return;
+      }
+
+      if (!formData.TransactionId) {
+        const errors: { [key: string]: string } = {};
+        const { TransactionId } = formData;
+
+        if (!TransactionId.trim())
+          errors.TransactionId = "Applicant Name is required.";
+        setFormErrors(errors);
         return;
       }
 
@@ -1473,8 +1521,6 @@ const AppointmentBooking = () => {
         ];
       }
 
-      console.log(selectedServices);
-
       console.log(finalData);
 
       const res = await httpClient.post(
@@ -1483,7 +1529,6 @@ const AppointmentBooking = () => {
       );
 
       const responseData = res.data.data;
-      console.log("responseData :", res);
       if (res.data.status === "success") {
         const invoiceUrls1: any[] = [];
         const allSuccessful = responseData.every((applicant: any) => {
@@ -1540,6 +1585,7 @@ const AppointmentBooking = () => {
             TransactionId: "",
             servicecode: [environment.DEFAULT_SERVICE_CODE],
             totalPrice: 0,
+            PaymentType: "",
           });
           setMembers([
             {
@@ -1574,16 +1620,12 @@ const AppointmentBooking = () => {
           });
         }
       } else {
-        toast({
-          title: "warning",
-          description: "Already There",
-          variant: "warn",
-          duration: 4000,
-        });
+        setShowDialog(false);
+        setopennewdialog(true);
+        setexistingapplicantdata(res.data.applicant_data);
       }
 
       // ✅ You can now use `invoiceUrls` wherever needed
-      console.log("Invoice URLs:", invoiceUrls);
 
       setShowDialog1(true);
     } catch (error) {
@@ -1592,10 +1634,24 @@ const AppointmentBooking = () => {
     }
   };
 
+  const isBeyond90Days = (currentDate: Date) => {
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 90);
+
+    // Start of next month
+    const nextMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      1
+    );
+    return nextMonth > maxDate;
+  };
+
   const cancel = () => {
     setFormErrors({});
     setShowDialog(false);
-
+    setMemberHasError([]);
     // Reset self form
     setFormData({
       patientName: "",
@@ -1613,6 +1669,7 @@ const AppointmentBooking = () => {
       TransactionId: "",
       servicecode: [environment.DEFAULT_SERVICE_CODE],
       totalPrice: 0,
+      PaymentType: "",
     });
 
     // Dynamically generate `membercount` empty members
@@ -1651,7 +1708,6 @@ const AppointmentBooking = () => {
       setHelperText("");
       return;
     }
-    console.log(file.type);
 
     const allowedTypes = [
       "image/png",
@@ -1726,6 +1782,10 @@ const AppointmentBooking = () => {
           : "Age Must Be 10 and above";
       case "patientName":
         return formErrors.age && "Enter Name";
+      case "TransactionId":
+        return formErrors.TransactionId
+          ? "Must Enter TransactionId"
+          : "Enter Transaction ID";
       case "hapId":
         return formErrors.hapId ? "8- digit" : "e.g. 98765432";
       default:
@@ -1756,7 +1816,7 @@ const AppointmentBooking = () => {
   };
 
   return (
-    <div className="container-fluid p-3" style={{ marginTop: "10px" }}>
+    <div>
       <div
         className="row"
         style={{ display: "flex", justifyContent: "space-evenly" }}
@@ -1818,8 +1878,13 @@ const AppointmentBooking = () => {
                       borderRadius: "5px",
                       border: "none",
                       fontSize: "16px",
+                      opacity: isBeyond90Days(currentDate) ? 0.5 : 1,
+                      pointerEvents: isBeyond90Days(currentDate)
+                        ? "none"
+                        : "auto",
                     }}
                     onClick={goToNext}
+                    disabled={isBeyond90Days(currentDate)}
                   >
                     ›
                   </button>
@@ -1902,8 +1967,6 @@ const AppointmentBooking = () => {
                     const selected = isSelected(day);
                     const hasSlot = hasEvent(day);
                     const totaldaycount = totalcount(day);
-                    console.log(hasSlot);
-                    console.log(totaldaycount);
 
                     const currentMonth = isCurrentMonth(day);
 
@@ -1911,7 +1974,8 @@ const AppointmentBooking = () => {
                       isPastDate(day) || // Disable past
                       day.getDay() === 0 || // Disable Sundays
                       !isWithin90DaysFromToday(day) || // Disable if not in next 90 days
-                      !selectedCenter;
+                      !selectedCenter || // Disable if no center
+                      totaldaycount === 0; // Disable if no available slots
 
                     const dayStyle: React.CSSProperties = {
                       width: "35px",
@@ -2225,41 +2289,75 @@ const AppointmentBooking = () => {
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        gap: "10px",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: "5px",
                       }}
                     >
-                      <label
+                      <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "20%",
-                          fontSize: "15px",
-                          fontWeight: "bold",
+                          justifyContent: "flex-start",
+                          gap: "10px",
+                          width: "100%",
                         }}
                       >
-                        Member's Count<span>:</span>
-                      </label>
-                      {/* <select>
-                        <option value={1}>1</option>
-                      </select> */}
-                      <input
-                        style={{ width: "120px" }}
-                        type="number"
-                        value={membercount}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value, 10);
-                          if (!isNaN(value) && value >= 2 && value <= 5) {
-                            handleMemberCountChange(e);
-                          } else {
-                            setmembercount(0);
-                          }
-                        }}
-                        min={1}
-                        className="form-control"
-                      />
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "20%",
+                            fontSize: "15px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Member's Count<span>:</span>
+                        </label>
+
+                        <div
+                          style={{ display: "flex", flexDirection: "column" }}
+                        >
+                          <input
+                            style={{
+                              width: "120px",
+                              border: shake ? "2px solid red" : undefined,
+                              outline: shake ? "none" : undefined,
+                            }}
+                            type="number"
+                            value={membercount}
+                            onChange={handleMemberCountChange}
+                            onKeyDown={(e) => {
+                              if (["e", "E", ".", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                              const input = e.currentTarget;
+                              if (
+                                input.value.length >= 2 &&
+                                ![
+                                  "Backspace",
+                                  "ArrowLeft",
+                                  "ArrowRight",
+                                  "Delete",
+                                ].includes(e.key)
+                              ) {
+                                e.preventDefault();
+                              }
+                            }}
+                            min={1}
+                            max={99}
+                            className={`form-control ${
+                              shake ? "input-shake" : ""
+                            }`}
+                          />
+                          {errorMessage && (
+                            <span style={{ color: "red", fontSize: "10px" }}>
+                              {errorMessage}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </form>
@@ -2304,7 +2402,7 @@ const AppointmentBooking = () => {
                       const dateKey = Object.keys(slotsGroupedByDate).find(
                         (key) =>
                           new Date(key).toDateString() === date.toDateString()
-                      );
+                      ) ;
                       const slots = dateKey
                         ? Array.from(
                             new Map(
@@ -2318,7 +2416,7 @@ const AppointmentBooking = () => {
 
                       return (
                         <div
-                          key={dateKey}
+                          key={date.toISOString()}
                           className="mb-3"
                           style={{
                             display: "flex",
@@ -2351,71 +2449,99 @@ const AppointmentBooking = () => {
                                 justifyContent: "flex-start",
                               }}
                             >
-                              {slots.map((slot: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="col-12 col-sm-6 col-md-4 mb-3 position-relative"
-                                  style={{ padding: "0px 10px" }}
-                                >
-                                  {/* Badge for remaining */}
-                                  {slot.remaining > 0 && (
-                                    <span
-                                      className={`position-absolute badge ${
-                                        slot.remaining < membercount
-                                          ? "badge-disabled"
-                                          : "bg-success"
+                              {slots
+                                .filter((slot) => {
+                                  const today = new Date().toDateString();
+                                  const slotDate = new Date(
+                                    slot?.slotItem?.slot?.date
+                                  ).toDateString();
+
+                                  if (slotDate === today) {
+                                    // Today → check if slot is NOT expired
+                                    return !isSlotExpired(
+                                      slot?.time,
+                                      slot?.slotItem?.slot?.date
+                                    );
+                                  }
+
+                                  // Future dates → always include
+                                  return true;
+                                })
+                                .map((slot: any, idx: number) => (
+                                  <div
+                                   key={`${slot?.slotItem?.slot?.date}-${slot.time}`}
+                                    className="col-12 col-sm-6 col-md-4 mb-3 position-relative"
+                                    style={{ padding: "0px 10px" }}
+                                  >
+                                    {/* Badge for remaining */}
+                                    {slot.remaining > 0 && (
+                                      <span
+                                        className={`position-absolute badge ${
+                                          slot.remaining < membercount
+                                            ? "badge-disabled"
+                                            : isSlotExpired(
+                                                slot?.time,
+                                                slot?.slotItem?.slot?.date
+                                              )
+                                            ? "badge-disabled"
+                                            : "bg-success"
+                                        }`}
+                                        style={{
+                                          top: "-10px",
+                                          left: "0px",
+                                          zIndex: 1,
+                                          borderRadius: "50%",
+                                          padding: "0.4em 0.6em",
+                                          fontSize: "0.75rem",
+                                        }}
+                                      >
+                                        {slot.remaining}
+                                      </span>
+                                    )}
+
+                                    <button
+                                      className={`btn w-70 text-start ${
+                                        slot.remaining > 0
+                                          ? "btn-outline-primary"
+                                          : "btn-outline-secondary disabled"
                                       }`}
+                                      onClick={() => bookTimeSlot(slot)}
+                                      disabled={
+                                        slot.remaining <= 0 ||
+                                        selectedServices.length === 0 ||
+                                        slot.remaining < membercount ||
+                                        isSlotExpired(
+                                          slot?.time,
+                                          slot?.slotItem?.slot?.date
+                                        )
+                                      }
                                       style={{
-                                        top: "-10px",
-                                        left: "0px",
-                                        zIndex: 1,
-                                        borderRadius: "50%",
-                                        padding: "0.4em 0.6em",
-                                        fontSize: "0.75rem",
+                                        borderRadius: "5px",
+                                        overflow: "hidden",
+                                        background:
+                                          slot.remaining < membercount
+                                            ? "grey"
+                                            : "",
+                                        color:
+                                          slot.remaining < membercount
+                                            ? "white"
+                                            : isSlotExpired(
+                                                slot?.time,
+                                                slot?.slotItem?.slot?.date
+                                              )
+                                            ? "grey"
+                                            : "",
+                                        cursor:
+                                          slot.remaining < membercount
+                                            ? "not-allowed"
+                                            : "pointer",
+                                        pointerEvents: "auto",
                                       }}
                                     >
-                                      {slot.remaining}
-                                    </span>
-                                  )}
-
-                                  <button
-                                    className={`btn w-70 text-start ${
-                                      slot.remaining > 0
-                                        ? "btn-outline-primary"
-                                        : "btn-outline-secondary disabled"
-                                    }`}
-                                    onClick={() => bookTimeSlot(slot)}
-                                    disabled={
-                                      slot.remaining <= 0 ||
-                                      selectedServices.length === 0 ||
-                                      slot.remaining < membercount ||
-                                      isSlotExpired(
-                                        slot?.time,
-                                        slot?.slotItem?.slot?.date
-                                      )
-                                    }
-                                    style={{
-                                      borderRadius: "5px",
-                                      overflow: "hidden",
-                                      background:
-                                        slot.remaining < membercount
-                                          ? "grey"
-                                          : "",
-                                      color:
-                                        slot.remaining < membercount
-                                          ? "white"
-                                          : "",
-                                      cursor:
-                                        slot.remaining < membercount
-                                          ? "not-allowed"
-                                          : "pointer",
-                                      pointerEvents: "auto",
-                                    }}
-                                  >
-                                    {slot.time}
-                                  </button>
-                                </div>
-                              ))}
+                                      {slot.time}
+                                    </button>
+                                  </div>
+                                ))}
                             </div>
                           ) : (
                             <p className="text-muted fst-italic px-2 py-3">
@@ -2432,6 +2558,58 @@ const AppointmentBooking = () => {
           </div>
         </div>
       </div>
+      <Dialog open={opennewdialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Active Appointment Detected</DialogTitle>
+            <DialogDescription>
+              You already have an active appointment scheduled.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* ✅ Basic Applicant Info */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 my-4">
+            <div>
+              <strong>Name:</strong> {existingapplicantdata?.fullname}
+            </div>
+            <div>
+              <strong>Applicant No:</strong>{" "}
+              {existingapplicantdata?.applicant_number}
+            </div>
+            <div>
+              <strong>Email:</strong> {existingapplicantdata?.email}
+            </div>
+            <div>
+              <strong>Passport No:</strong>{" "}
+              {existingapplicantdata?.passport_number}
+            </div>
+
+            <div>{selectedDate?.toISOString()}</div>
+          </div>
+
+          <div className="text-sm text-gray-600">
+            Continuing will allow you to book a new appointment. Make sure this
+            doesn't conflict with your current one.
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                Cancel
+              </button>
+            </DialogClose>
+            <button
+              onClick={() => {
+                // handle continue
+                setopennewdialog(false);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Continue Booking
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal Dialog */}
       {showDialog && (
@@ -2585,15 +2763,17 @@ const AppointmentBooking = () => {
                             className="w-full"
                           >
                             {members.map((member, i) => (
-                              <AccordionItem key={i} value={`item-${i}`}>
+                              <AccordionItem  key={i} value={`item-${i}`}>
                                 <AccordionTrigger>
                                   <div
-                                    className={`flex items-center gap-2 ${
-                                      memberHasError[i]
-                                        ? "bg-red-100 border-l-4 border-red-500 px-2 py-1"
-                                        : ""
-                                    }`}
-                                  >
+                                  
+                                   className={`flex items-center gap-2 ${
+  memberHasError[i]
+    ? "bg-red-100 border-l-4 border-red-500 px-2 py-1 input-shake"
+    : ""
+}`}
+
+                                   >
                                     {i === 0 ? (
                                       <>
                                         Primary Member Details
@@ -2607,7 +2787,6 @@ const AppointmentBooking = () => {
                                   </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  {/* <div className="border p-4 rounded-md"> */}
                                   <form>
                                     <div className="row mb-3">
                                       <div className="col-md-6 d-flex align-items-center">
@@ -2622,7 +2801,7 @@ const AppointmentBooking = () => {
                                           type="text"
                                           className={`form-control flex-grow-1 ${
                                             formErrors[`patientName_${i}`]
-                                              ? "is-invalid"
+                                              ? "is-invalid input-shake"
                                               : ""
                                           }`}
                                           id={`patientName_${i}`}
@@ -2648,7 +2827,7 @@ const AppointmentBooking = () => {
                                           type="text"
                                           className={`form-control flex-grow-1 ${
                                             formErrors[`contactNumber_${i}`]
-                                              ? "is-invalid"
+                                              ? "is-invalid input-shake"
                                               : ""
                                           }`}
                                           id={`contactNumber_${i}`}
@@ -2681,7 +2860,7 @@ const AppointmentBooking = () => {
                                         <select
                                           className={`form-control flex-grow-1 ${
                                             formErrors[`gender_${i}`]
-                                              ? "is-invalid"
+                                              ? "is-invalid input-shake"
                                               : ""
                                           }`}
                                           name="gender"
@@ -2735,7 +2914,7 @@ const AppointmentBooking = () => {
                                           placeholderText="Select DOB"
                                           className={`form-control ${
                                             formErrors[`dob_${i}`]
-                                              ? "is-invalid"
+                                              ? "is-invalid input-shake"
                                               : ""
                                           }`}
                                         />
@@ -2755,7 +2934,7 @@ const AppointmentBooking = () => {
                                           type="text"
                                           className={`form-control flex-grow-1 ${
                                             formErrors[`age_${i}`]
-                                              ? "is-invalid"
+                                              ? "is-invalid input-shake"
                                               : ""
                                           }`}
                                           id={`age_${i}`}
@@ -2788,7 +2967,7 @@ const AppointmentBooking = () => {
                                             type="text"
                                             className={`form-control flex-grow-1 ${
                                               formErrors[`passportNo_${i}`]
-                                                ? "is-invalid"
+                                                ? "is-invalid input-shake"
                                                 : ""
                                             }`}
                                             id={`passportNo_${i}`}
@@ -2821,7 +3000,7 @@ const AppointmentBooking = () => {
                                               id={`email_${i}`}
                                               className={`form-control flex-grow-1 ${
                                                 formErrors[`email_${i}`]
-                                                  ? "is-invalid"
+                                                  ? "is-invalid input-shake"
                                                   : ""
                                               }`}
                                               name="email"
@@ -2846,7 +3025,7 @@ const AppointmentBooking = () => {
                                               type="text"
                                               className={`form-control flex-grow-1 ${
                                                 formErrors[`hapId_${i}`]
-                                                  ? "is-invalid"
+                                                  ? "is-invalid input-shake"
                                                   : ""
                                               }`}
                                               id={`hapId_${i}`}
@@ -2884,7 +3063,7 @@ const AppointmentBooking = () => {
                                                 formErrors[
                                                   `alternativeNumber_${i}`
                                                 ]
-                                                  ? "is-invalid"
+                                                  ? "is-invalid input-shake"
                                                   : ""
                                               }`}
                                               id={`alternativeNumber_${i}`}
@@ -2916,7 +3095,7 @@ const AppointmentBooking = () => {
                                             <select
                                               className={`form-control flex-grow-1 ${
                                                 formErrors[`paymentMethod_${i}`]
-                                                  ? "is-invalid"
+                                                  ? "is-invalid input-shake"
                                                   : ""
                                               }`}
                                               id={`paymentMethod_${i}`}
@@ -2934,15 +3113,6 @@ const AppointmentBooking = () => {
                                       </>
                                     )}
                                   </form>
-                                  {/* </div> */}
-                                  <div className="flex items-center justify-end w-[100%] space-y-4">
-                                    <button
-                                      className="flex items-center justify-end px-6 py-1.5 rounded bg-orange-500 text-white"
-                                      onClick={() => handleMemberNext(i)}
-                                    >
-                                      Next
-                                    </button>
-                                  </div>
                                 </AccordionContent>
                               </AccordionItem>
                             ))}
@@ -2957,12 +3127,14 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Name:
+                                Name
                               </label>
                               <input
                                 type="text"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.patientName ? "is-invalid" : ""
+                                  formErrors.patientName
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 id="patientName"
                                 name="patientName"
@@ -2979,12 +3151,14 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                HAP ID:
+                                HAP ID
                               </label>
                               <input
                                 type="text"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.hapId ? "is-invalid" : ""
+                                  formErrors.hapId
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 id="hapId"
                                 inputMode="numeric"
@@ -3011,13 +3185,15 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Email:
+                                Email
                               </label>
                               <input
                                 type="email"
                                 id="email"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.email ? "is-invalid" : ""
+                                  formErrors.email
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 name="email"
                                 value={formData.email}
@@ -3032,12 +3208,14 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Contact Number:
+                                Contact Number
                               </label>
                               <input
                                 type="text"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.contactNumber ? "is-invalid" : ""
+                                  formErrors.contactNumber
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 id="contactNumber"
                                 name="contactNumber"
@@ -3064,13 +3242,13 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Alternative Number:
+                                Alternative Number
                               </label>
                               <input
                                 type="text"
                                 className={`form-control flex-grow-1 ${
                                   formErrors.alternativeNumber
-                                    ? "is-invalid"
+                                    ? "is-invalid input-shake"
                                     : ""
                                 }`}
                                 id="alternativeNumber"
@@ -3095,11 +3273,13 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Gender:
+                                Gender
                               </label>
                               <select
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.gender ? "is-invalid" : ""
+                                  formErrors.gender
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 name="gender"
                                 id="gender"
@@ -3121,12 +3301,12 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                DOB:
+                                DOB
                               </label>
                               {/* <input
                                 type="date"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.dob ? "is-invalid" : ""
+                                  formErrors.dob ? "is-invalid input-shake" : ""
                                 }`}
                                 id="dob"
                                 name="dob"
@@ -3165,7 +3345,7 @@ const AppointmentBooking = () => {
                                 dropdownMode="select"
                                 placeholderText="Select DOB"
                                 className={`form-control ${
-                                  formErrors.dob ? "is-invalid" : ""
+                                  formErrors.dob ? "is-invalid input-shake" : ""
                                 }`}
                               />
                             </div>
@@ -3175,12 +3355,12 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Age:
+                                Age
                               </label>
                               <input
                                 type="text"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.age ? "is-invalid" : ""
+                                  formErrors.age ? "is-invalid input-shake" : ""
                                 }`}
                                 id="age"
                                 name="age"
@@ -3206,13 +3386,15 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Passport No:
+                                Passport No
                               </label>
                               <div style={{ width: "100%" }}>
                                 <input
                                   type="text"
                                   className={`form-control flex-grow-1 ${
-                                    formErrors.passportNo ? "is-invalid" : ""
+                                    formErrors.passportNo
+                                      ? "is-invalid input-shake"
+                                      : ""
                                   }`}
                                   id="passportNo"
                                   name="passportNo"
@@ -3238,11 +3420,13 @@ const AppointmentBooking = () => {
                                 className="me-2 mb-0"
                                 style={{ width: "150px" }}
                               >
-                                Payment Method:
+                                Payment Method
                               </label>
                               <select
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.paymentMethod ? "is-invalid" : ""
+                                  formErrors.paymentMethod
+                                    ? "is-invalid input-shake"
+                                    : ""
                                 }`}
                                 id="paymentMethod"
                                 name="paymentMethod"
@@ -3335,8 +3519,48 @@ const AppointmentBooking = () => {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "space-between",
+                                width: "185px",
+                                fontWeight: "bold",
+                              }}
+                              htmlFor="PaymentType"
+                            >
+                              Payment Type<span>:</span>
+                            </label>
+                            <select
+                              id="PaymentType"
+                              style={{ padding: "5px", width: "50%" }}
+                              name="PaymentType"
+                              className={`form-control flex-grow-1 ${
+                                formErrors.TransactionId
+                                  ? "is-invalid input-shake"
+                                  : ""
+                              }`}
+                              value={formData.PaymentType}
+                              onChange={handleChange}
+                              autoComplete="off"
+                            >
+                              <option value="Select">Select</option>
+                              <option>Gpay</option>
+                              <option>PhonePay</option>
+                              <option>Paytm</option>
+                            </select>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <label
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
                                 width: "85%",
                                 fontWeight: "bold",
+                                cursor: "pointer",
+                                pointerEvents: "auto",
                               }}
                             >
                               Upload Transaction file<span>:</span>
@@ -3348,26 +3572,23 @@ const AppointmentBooking = () => {
                               }}
                             >
                               <Input
-                                style={{ width: "183px", cursor: "pointer" }}
+                                style={{
+                                  width: "183px",
+                                  cursor:
+                                    !formData.PaymentType ||
+                                    formData.PaymentType === ""
+                                      ? "not-allowed"
+                                      : "pointer",
+                                  pointerEvents: "auto",
+                                }}
                                 type="file"
                                 accept=".png,.pdf"
                                 onChange={handleFileChange}
+                                disabled={!formData.PaymentType}
                               />
-                              {helperText && (
-                                <span
-                                  style={{
-                                    fontSize: "12px",
-                                    color: helperText.includes("valid")
-                                      ? "green"
-                                      : "#dc2626", // red for warnings
-                                    marginTop: "4px",
-                                  }}
-                                >
-                                  {helperText}
-                                </span>
-                              )}
                             </div>
                           </div>
+
                           <div
                             style={{
                               display: "flex",
@@ -3384,13 +3605,22 @@ const AppointmentBooking = () => {
                                 fontWeight: "bold",
                               }}
                             >
-                              Enter Transaction ID<span>:</span>
+                              Transaction ID<span>:</span>
                             </label>
                             <input
-                              style={{ padding: "5px" }}
+                              style={{ padding: "5px", width: "50%" }}
                               name="TransactionId"
+                              className={`form-control flex-grow-1 ${
+                                formErrors.TransactionId
+                                  ? "is-invalid input-shake"
+                                  : ""
+                              }`}
                               value={formData.TransactionId}
                               onChange={handleChange}
+                              autoComplete="off"
+                              placeholder={getDynamicPlaceholder(
+                                "TransactionId"
+                              )}
                             />
                           </div>
                         </div>
@@ -3450,7 +3680,7 @@ const AppointmentBooking = () => {
                   Find Your Bill Receipt's
                 </h1>
                 <span
-                  onClick={cancel1}
+                  // onClick={cancel1}
                   style={{ cursor: "pointer", opacity: 0.6, fontSize: 18 }}
                 >
                   &#10006;
