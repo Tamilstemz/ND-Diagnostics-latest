@@ -1432,7 +1432,7 @@ const AppointmentBooking = () => {
       );
     }
     setFormErrors({});
- setMemberHasError(Array(members.length).fill(false));
+    setMemberHasError(Array(members.length).fill(false));
     // Clear only personal details in members (assumes 1 member initially)
   };
 
@@ -2402,7 +2402,7 @@ const AppointmentBooking = () => {
                       const dateKey = Object.keys(slotsGroupedByDate).find(
                         (key) =>
                           new Date(key).toDateString() === date.toDateString()
-                      ) ;
+                      );
                       const slots = dateKey
                         ? Array.from(
                             new Map(
@@ -2469,7 +2469,7 @@ const AppointmentBooking = () => {
                                 })
                                 .map((slot: any, idx: number) => (
                                   <div
-                                   key={`${slot?.slotItem?.slot?.date}-${slot.time}`}
+                                    key={`${slot?.slotItem?.slot?.date}-${slot.time}`}
                                     className="col-12 col-sm-6 col-md-4 mb-3 position-relative"
                                     style={{ padding: "0px 10px" }}
                                   >
@@ -2763,17 +2763,15 @@ const AppointmentBooking = () => {
                             className="w-full"
                           >
                             {members.map((member, i) => (
-                              <AccordionItem  key={i} value={`item-${i}`}>
+                              <AccordionItem key={i} value={`item-${i}`}>
                                 <AccordionTrigger>
                                   <div
-                                  
-                                   className={`flex items-center gap-2 ${
-  memberHasError[i]
-    ? "bg-red-100 border-l-4 border-red-500 px-2 py-1 input-shake"
-    : ""
-}`}
-
-                                   >
+                                    className={`flex items-center gap-2 ${
+                                      memberHasError[i]
+                                        ? "bg-red-100 border-l-4 border-red-500 px-2 py-1 input-shake"
+                                        : ""
+                                    }`}
+                                  >
                                     {i === 0 ? (
                                       <>
                                         Primary Member Details
