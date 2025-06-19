@@ -1757,20 +1757,14 @@ const AppointmentBooking = () => {
 
   return (
     <div className="container-fluid p-3" style={{ marginTop: "10px" }}>
-      <div
-        className="row"
-        style={{ display: "flex", justifyContent: "space-evenly" }}
-      >
+      <div className="row custom-main-layout" >
         {/* Calendar Section */}
-        <div className="col-lg-5 col-md-6 mb-4">
-          <div
-            className="card border"
-            style={{ borderColor: "#dee2e6", borderRadius: "8px" }}
-          >
+        <div className="calendar-section col-lg-5 col-md-12 mb-4">
+          <div className="card border calendar-card">
             <div className="card-header bg-white border-0">
               <div className="d-flex justify-content-between align-items-center py-3">
                 <h4
-                  className="mb-0 text-dark fw-normal"
+                  className="mb-0 text-dark fw-normal monthhead"
                   style={{ fontSize: "20px" }}
                 >
                   {getMonthName()}
@@ -1826,70 +1820,47 @@ const AppointmentBooking = () => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Slot Closed - Red X Icon */}
+            
+           <div className="calendar-legend d-flex flex-row align-items-center flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-2">
               <div
-                className="flex items-center gap-2"
-                style={{
-                  padding: "0px 10px 10px",
-                }}
-              >
-                <div
-                  className="bg-red-500 rounded-full"
-                  style={{
-                    width: "15px",
-                    height: "15px",
-                  }}
-                ></div>
-                <span className="text-sm text-gray-700">Slot Closed</span>
-              </div>
-
-              {/* Available - Green Check Icon */}
-              <div
-                className="flex items-center gap-2"
-                style={{
-                  padding: "0px 10px 10px",
-                }}
-              >
-                <div
-                  className="bg-green-500 rounded-full"
-                  style={{
-                    width: "15px",
-                    height: "15px",
-                  }}
-                ></div>
-                <span className="text-sm text-gray-700">Slot Available</span>
-              </div>
+                className="bg-danger rounded-circle"
+                style={{ width: "15px", height: "15px" }}
+              ></div>
+              <span className="text-muted small">Slot Closed</span>
             </div>
+            <div className="d-flex align-items-center gap-2 ms-4">
+              <div
+                className="slotNum-success rounded-circle"
+                style={{ width: "15px", height: "15px" }}
+              ></div>
+              <span className="text-muted small">Slot Available</span>
+            </div>
+          </div>
 
-            <div
-              className="card-body p-4"
-              style={{ backgroundColor: "#f8f9fa", minHeight: "450px" }}
-            >
+
+
+
+
+            <div className="calendarmainbody card-body p-4">
               {/* Weekday Headers */}
-              <div className="d-flex mb-4">
+              <div className="d-flex lg:mb-4 sm:mb-4">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
                   (day) => (
                     <div key={day} className="flex-fill text-center">
                       <div
-                        className="fw-semibold text-dark"
-                        style={{ fontSize: "16px", fontWeight: "600" }}
-                      >
+                        className="fw-semibold text-dark dayfontsize">
                         {day}
                       </div>
                     </div>
                   )
                 )}
               </div>
+
               <div className="calendar-wrapper">
                 <div
                   className={`calendar-grid ${selectedCenter ? "active" : ""}`}
                   style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(7, 1fr)",
-                    gap: "8px",
-                    height: "350px",
-                    position: "relative",
                     opacity: !selectedCenter ? 0.5 : 1,
                     pointerEvents: !selectedCenter ? "none" : "auto",
                     cursor: !selectedCenter ? "not-allowed" : "pointer",
@@ -1914,40 +1885,22 @@ const AppointmentBooking = () => {
                       !selectedCenter;
 
                     const dayStyle: React.CSSProperties = {
-                      width: "35px",
-                      height: "35px",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                      color: !currentMonth
-                        ? "#ccc"
-                        : past
-                        ? "#888"
-                        : today || selected
-                        ? "white"
-                        : "black",
+                      opacity: isDisabled ? 0.5 : 1,
                       border: isDisabled ? "1px solid #ccc" : "none",
                       cursor: isDisabled ? "not-allowed" : "pointer",
                       backgroundColor: today
-                        ? "#e67e22"
-                        : selected
-                        ? "#007bff"
-                        : "transparent",
-                      position: "relative",
-                      opacity: isDisabled ? 0.5 : 1,
-                      borderRadius: "0px",
-                      pointerEvents: "auto",
+                        ? "#fe9647" : "transparent",
+                      
                     };
 
                     return (
                       <div
                         key={index}
-                        className="d-flex align-items-center justify-content-center position-relative"
+                        className="d-flex align-items-center justify-content-center position-relative calendardaybox"
                         style={{
-                          height: "35px",
-                          fontSize: "16px",
-                          fontWeight: "400",
                           pointerEvents: isDisabled ? "none" : "auto",
-                        }}
+                        }}  
+
                         onClick={() => {
                           if (!isDisabled) {
                             handleDateClick(day, timeSlots);
@@ -1955,7 +1908,7 @@ const AppointmentBooking = () => {
                         }}
                       >
                         <div
-                          className={`d-flex align-items-center justify-content-center rounded-square position-relative ${
+                          className={`calendardaystyle d-flex align-items-center justify-content-center rounded-square position-relative ${
                             !isDisabled ? "calendar-day" : ""
                           } ${isSelecteddate(day) ? "selected" : ""}`}
                           style={dayStyle}
@@ -1964,20 +1917,10 @@ const AppointmentBooking = () => {
 
                           {hasSlot && (
                             <div
+                            className="calendarAvalSlot"
                               style={{
-                                position: "absolute",
-                                top: "24px",
-                                left: "24px",
-                                width: "15px",
-                                height: "15px",
-                                borderRadius: "50%",
                                 backgroundColor:
-                                  totaldaycount === 0 ? "red" : "#28a745", // 🔴 red if 0, ✅ green otherwise
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                color: "white",
-                                fontSize: "9px",
+                                  totaldaycount === 0 ? "red" : "rgb(33 55 96)", 
                               }}
                             >
                               {totaldaycount === 0 ? "" : totaldaycount}
@@ -1996,47 +1939,24 @@ const AppointmentBooking = () => {
                 )}
               </div>
             </div>
+
           </div>
 
           {/* Time Slots Panel */}
         </div>
 
         {/* Service Selection Section */}
-        <div className="col-lg-6 col-md-12">
+        <div className="form-section col-lg-6 col-md-12 mb-4">
           <div className="card shadow-sm">
-            <div className="card-body">
-              <div className="col g-4 mb-4" style={{ display: "flex" }}>
-                <div
-                  className="col-md-6"
-                  style={{ display: "flex", gap: "15px" }}
-                >
-                  <label
-                    style={{
-                      display: "flex",
-                      width: "180px",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                    className="form-label"
-                  >
-                    Centre <span>:</span>
+            <div className="card-body Service-card-body">
+              
+              <div className="row g-3 mb-4" >
+                <div className="col-12 col-md-6">
+                  <label className="form-label fw-semibold d-flex justify-content-between" >
+                    Centre 
                   </label>
                   <select
-                    style={{
-                      width: "100%",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      padding: "6px 10px",
-                      border: "1px solid lightgrey",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      backgroundColor: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      boxSizing: "border-box",
-                    }}
+                    className="form-select"
                     value={selectedCenter}
                     onChange={handleCenterChange}
                   >
@@ -2049,65 +1969,28 @@ const AppointmentBooking = () => {
                       ))}
                   </select>
                 </div>
-                <div
-                  className="col-md-6"
-                  style={{ display: "flex", gap: "10px" }}
-                >
-                  <label
-                    style={{
-                      width: "100px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginLeft: "5px",
-                    }}
-                  >
-                    Service <span>:</span>
+                <div className="col-12 col-md-6">
+                  <label className="form-label fw-semibold d-flex justify-content-between">
+                    Service 
                   </label>
 
-                  <div
-                    style={{ position: "relative", width: "18rem" }}
-                    ref={dropdownRef}
-                  >
+                  <div style={{ position: "relative"}} ref={dropdownRef}>
                     {/* Trigger */}
                     <div
-                      style={{
-                        width: "100%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        padding: "6px 10px",
-                        border: "1px solid lightgrey",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        backgroundColor: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        boxSizing: "border-box",
-                      }}
+                      className="form-select"
                       onClick={toggleDropdown}
+                       style={{
+                      cursor: "pointer",
+                      paddingRight: "2rem", // space for arrow
+                    }}
                     >
                       {getSelectedServiceNames() || "Select Service"}
-                      <span>&#9662;</span>
+                      <span style={{ float: "right" }}>&#9662;</span>
                     </div>
 
                     {dropdownOpen && (
                       <div
-                        style={{
-                          position: "absolute",
-                          top: "100%",
-                          left: 0,
-                          width: "100%",
-                          backgroundColor: "white",
-                          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)",
-                          border: "1px solid lightgray",
-                          borderRadius: "5px",
-                          maxHeight: "300px",
-                          overflowY: "auto",
-                          boxSizing: "border-box",
-                          zIndex: 999,
-                        }}
+                        className="dropdown-menu show custom-dropdown"
                       >
                         {selectedCenter && serviceList.length > 1 && (
                           <label
@@ -2180,73 +2063,61 @@ const AppointmentBooking = () => {
                     )}
                   </div>
                 </div>
+
+               
               </div>
 
-              <div
-                className="mb-3"
-                style={{ display: "flex", gap: "10px", fontSize: "16px" }}
-              >
-                <div className="form-check formData-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="appointmentType"
-                    id="self"
-                    value="Self"
-                    checked={appointmentType === "Self"}
-                    onChange={(e) =>
-                      appointmentTypechnage(e.target.value, "Self")
-                    }
-                  />
-                  <label className="form-check-label" htmlFor="self">
-                    Self
-                  </label>
-                </div>
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="appointmentType"
-                    id="group"
-                    value="Group"
-                    checked={appointmentType === "Group"}
-                    onChange={(e) =>
-                      appointmentTypechnage(e.target.value, "Group")
-                    }
-                  />
-                  <label className="form-check-label" htmlFor="group">
-                    Group
-                  </label>
-                </div>
-              </div>
-              {appointmentType === "Group" && (
-                <form>
+                <div className="row g-3 mb-2">
+                  {/* Appointment Type */}
+                  <div className="col-12 col-md-6">
+                    <label className="form-label fw-semibold">Appointment Type</label>
+                    <div className="d-flex gap-4">
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="appointmentType"
+                          id="self"
+                          value="Self"
+                          checked={appointmentType === "Self"}
+                          onChange={(e) => appointmentTypechnage(e.target.value, "Self")}
+                          style={{
+                            backgroundColor: appointmentType === "Self" ? "#e67e22" : "transparent",
+                            borderColor: "#e67e22",
+                          }}
+                        />
+                        <label className="form-check-label" htmlFor="self">
+                          Self
+                        </label>
+                      </div>
+                      <div className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="appointmentType"
+                          id="group"
+                          value="Group"
+                          checked={appointmentType === "Group"}
+                          onChange={(e) => appointmentTypechnage(e.target.value, "Group")}
+                           style={{
+                            backgroundColor: appointmentType === "Group" ? "#e67e22" : "transparent",
+                            borderColor: "#e67e22",
+                          }}
+                        />
+                        <label className="form-check-label" htmlFor="group">
+                          Group
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Member Count (only shown if Group is selected) */}
                   {appointmentType === "Group" && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                        gap: "10px",
-                      }}
-                    >
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          width: "20%",
-                          fontSize: "15px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        Member's Count<span>:</span>
+                    <div className="col-12 col-md-6">
+                      <label className="form-label fw-semibold d-flex justify-content-between">
+                        Member's Count 
                       </label>
-                      {/* <select>
-                        <option value={1}>1</option>
-                      </select> */}
                       <input
-                        style={{ width: "120px" }}
                         type="number"
                         value={membercount}
                         onChange={(e) => {
@@ -2257,25 +2128,22 @@ const AppointmentBooking = () => {
                             setmembercount(0);
                           }
                         }}
-                        min={1}
                         className="form-control"
+                        min={2}
+                        max={5}
                       />
                     </div>
                   )}
-                </form>
-              )}
+                </div>
+              
+              
+        
             </div>
 
             {selectedDate && selectedCenter && (
-              <div
-                key={selectedDate.toString()}
-                className="card shadow-sm mt-3 slot-slide-in position-relative"
-                style={{
-                  border: "1px solid #dee2e6",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                }}
+              <div key={selectedDate.toString()}
               >
+                
                 {/* 🔴 Overlay if no service selected */}
                 {selectedServices.length === 0 && (
                   <div
@@ -2324,7 +2192,13 @@ const AppointmentBooking = () => {
                             display: "flex",
                             gap: "10px",
                             flexDirection: "column",
-                            border: "1px solid lightgrey",
+                            border: "1px solid rgb(216, 188, 148)", // light orange border
+                            borderRadius: "8px",
+                            backgroundColor: "#fff",
+                            boxShadow: `
+                              0 2px 4px rgba(255, 255, 255, 0.7),     
+                              0 4px 10px rgba(230, 126, 34, 0.3)   
+                            `
                           }}
                         >
                           <div
@@ -2349,71 +2223,70 @@ const AppointmentBooking = () => {
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "flex-start",
+                                padding:"10px 10px"
                               }}
                             >
                               {slots.map((slot: any, idx: number) => (
                                 <div
                                   key={idx}
                                   className="col-12 col-sm-6 col-md-4 mb-3 position-relative"
-                                  style={{ padding: "0px 10px" }}
+                                 
                                 >
                                   {/* Badge for remaining */}
-                                  {slot.remaining > 0 && (
-                                    <span
-                                      className={`position-absolute badge ${
-                                        slot.remaining < membercount
-                                          ? "badge-disabled"
-                                          : "bg-success"
-                                      }`}
-                                      style={{
-                                        top: "-10px",
-                                        left: "0px",
-                                        zIndex: 1,
-                                        borderRadius: "50%",
-                                        padding: "0.4em 0.6em",
-                                        fontSize: "0.75rem",
-                                      }}
-                                    >
-                                      {slot.remaining}
-                                    </span>
+                                  
+                                  {slot.remaining > 0 ? (
+                                      <>
+                                        <span
+                                          className={`position-absolute badge ${
+                                            slot.remaining < membercount ? "badge-disabled" : "slotNum-success"
+                                          }`}
+                                          style={{
+                                            top: "-10px",
+                                            left: "0px",
+                                            zIndex: 1,
+                                            borderRadius: "50%",
+                                            padding: "0.4em 0.6em",
+                                          }}
+                                        >
+                                          {slot.remaining}
+                                        </span>
+
+                                        <button
+                                          className={`btn w-70 text-start btnclr ${
+                                            slot.remaining < membercount ? "btn-outline-secondary" : "btn-outline-primary"
+                                          }`}
+                                          onClick={() => bookTimeSlot(slot)}
+                                          disabled={
+                                            slot.remaining < membercount ||
+                                            selectedServices.length === 0 ||
+                                            isSlotExpired(slot?.time, slot?.slotItem?.slot?.date)
+                                          }
+                                          style={{
+                                            borderRadius: "5px",
+                                            background: slot.remaining < membercount ? "grey" : "",
+                                            color: slot.remaining < membercount ? "white" : "",
+                                            cursor: slot.remaining < membercount ? "not-allowed" : "pointer",
+                                          }}
+                                          aria-disabled={
+                                            slot.remaining < membercount ||
+                                            selectedServices.length === 0 ||
+                                            isSlotExpired(slot?.time, slot?.slotItem?.slot?.date)
+                                          }
+                                          aria-label={
+                                            slot.remaining < membercount
+                                              ? "Not enough available slots"
+                                              : "Select time slot"
+                                          }
+                                        >
+                                          {slot.time}
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <p className="text-muted fst-italic">No slots for this date</p>
                                   )}
 
-                                  <button
-                                    className={`btn w-70 text-start ${
-                                      slot.remaining > 0
-                                        ? "btn-outline-primary"
-                                        : "btn-outline-secondary disabled"
-                                    }`}
-                                    onClick={() => bookTimeSlot(slot)}
-                                    disabled={
-                                      slot.remaining <= 0 ||
-                                      selectedServices.length === 0 ||
-                                      slot.remaining < membercount ||
-                                      isSlotExpired(
-                                        slot?.time,
-                                        slot?.slotItem?.slot?.date
-                                      )
-                                    }
-                                    style={{
-                                      borderRadius: "5px",
-                                      overflow: "hidden",
-                                      background:
-                                        slot.remaining < membercount
-                                          ? "grey"
-                                          : "",
-                                      color:
-                                        slot.remaining < membercount
-                                          ? "white"
-                                          : "",
-                                      cursor:
-                                        slot.remaining < membercount
-                                          ? "not-allowed"
-                                          : "pointer",
-                                      pointerEvents: "auto",
-                                    }}
-                                  >
-                                    {slot.time}
-                                  </button>
+
+                                  
                                 </div>
                               ))}
                             </div>
@@ -2431,6 +2304,7 @@ const AppointmentBooking = () => {
             )}
           </div>
         </div>
+
       </div>
 
       {/* Modal Dialog */}
@@ -2704,7 +2578,7 @@ const AppointmentBooking = () => {
                                         >
                                           DOB:
                                         </label>
-                                        <DatePicker
+                                        {/* <DatePicker
                                           selected={
                                             member.dob
                                               ? new Date(member.dob)
@@ -2738,7 +2612,24 @@ const AppointmentBooking = () => {
                                               ? "is-invalid"
                                               : ""
                                           }`}
-                                        />
+                                        /> */}
+                                        <input
+                                            type="date"
+                                            className={`form-control flex-grow-1 ${
+                                              formErrors.dob ? "is-invalid" : ""
+                                            }`}
+                                            id="dob"
+                                            name="dob"
+                                            value={formData.dob}
+                                            min={getMinDOB()}
+                                            max={getMaxDOB()}
+                                            onChange={handleChange}
+                                            style={{
+                                              cursor: "pointer",
+                                              backgroundColor: "#fff",
+                                            }}
+                                            onKeyDown={(e) => e.preventDefault()}
+                                          /> 
                                       </div>
                                     </div>
 
@@ -3123,7 +3014,7 @@ const AppointmentBooking = () => {
                               >
                                 DOB:
                               </label>
-                              {/* <input
+                              <input
                                 type="date"
                                 className={`form-control flex-grow-1 ${
                                   formErrors.dob ? "is-invalid" : ""
@@ -3134,13 +3025,14 @@ const AppointmentBooking = () => {
                                 min={getMinDOB()}
                                 max={getMaxDOB()}
                                 onChange={handleChange}
-                                onKeyDown={(e) => e.preventDefault()}
                                 style={{
                                   cursor: "pointer",
                                   backgroundColor: "#fff",
                                 }}
-                              /> */}{" "}
-                              <DatePicker
+                                onKeyDown={(e) => e.preventDefault()}
+                              /> 
+                              {/* {" "} */}
+                              {/* <DatePicker
                                 selected={
                                   formData.dob ? new Date(formData.dob) : null
                                 }
@@ -3167,7 +3059,7 @@ const AppointmentBooking = () => {
                                 className={`form-control ${
                                   formErrors.dob ? "is-invalid" : ""
                                 }`}
-                              />
+                              /> */}
                             </div>
                             <div className="col-md-6 d-flex align-items-center">
                               <label
@@ -3435,50 +3327,6 @@ const AppointmentBooking = () => {
         </div>
       )}
 
-      {/* {showDialog1 && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header justify-content-between">
-                <h1
-                  style={{ fontSize: "30px", fontWeight: "bold" }}
-                  className="modal-title w-100 text-center"
-                >
-                  Find Your Bill Receipt's
-                </h1>
-                <span
-                  onClick={cancel1}
-                  style={{ cursor: "pointer", opacity: 0.6, fontSize: 18 }}
-                >
-                  &#10006;
-                </span>
-              </div>
-
-              <div className="modal-body">
-                {invoiceUrls.length > 0 ? (
-                  invoiceUrls.map((url: string, index: number) => (
-                    <div key={index} className="mb-2">
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-primary w-100"
-                      >
-                        📄 View Receipt {index + 1}
-                      </a>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center">No invoice URLs available.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

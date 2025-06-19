@@ -41,7 +41,7 @@ export default function Contact() {
                     icon: <Mail className="text-white w-4 h-4 sm:w-5 sm:h-5" />,
                     title: "Clinic Email",
                     color: "green",
-                    text: `cm@ndhealthcareservices.com`,
+                    text: `info@ndhealthcheck.com`,
                   },
                   {
                     icon: <Clock className="text-white w-4 h-4 sm:w-5 sm:h-5" />,
