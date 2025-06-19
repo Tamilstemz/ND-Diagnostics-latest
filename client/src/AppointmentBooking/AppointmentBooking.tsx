@@ -3444,8 +3444,6 @@ const AppointmentBooking = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };
