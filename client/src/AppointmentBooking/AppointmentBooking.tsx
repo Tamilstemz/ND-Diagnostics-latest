@@ -1764,6 +1764,9 @@ const AppointmentBooking = () => {
   ) => {
     const { name, value } = e.target;
 
+    console.log('vvvvvvv---1',appointmentType,'222222',index);
+    
+
     if (appointmentType === "Self") {
       let updatedData = { ...formData, [name]: value };
 
@@ -1778,20 +1781,22 @@ const AppointmentBooking = () => {
         if (!alphabetOnlyRegex.test(value)) return; // Ignore invalid characters
       }
 
-      if (name === "age") {
-        if (/^\d+$/.test(value)) {
-          // Valid number entered → calculate DOB
-          updatedData.dob = calculateDOB(value);
-        } else if (value.trim() === "") {
-          // If age is cleared → reset DOB too
-          updatedData.dob = "";
-        }
-      }
+      // if (name === "age") {
+      //   if (/^\d+$/.test(value)) {
+      //     // Valid number entered → calculate DOB
+      //     updatedData.dob = calculateDOB(value);
+      //   } else if (value.trim() === "") {
+      //     // If age is cleared → reset DOB too
+      //     updatedData.dob = "";
+      //   }
+      // }
 
       if (name === "hapId" && !/^\d{8}$/.test(value)) {
         updatedData.hapId = value;
       }
 
+      console.log('updatedData-------',updatedData);
+      
       setFormData(updatedData);
 
       // Clear error if present
@@ -1800,6 +1805,9 @@ const AppointmentBooking = () => {
         delete updatedErrors[name];
         return updatedErrors;
       });
+
+      console.log('formData-----',formData);
+      
     } else if (appointmentType === "Group" && typeof index === "number") {
       const updatedMembers = [...members];
       updatedMembers[index][name] = value;
@@ -1815,15 +1823,15 @@ const AppointmentBooking = () => {
         updatedMembers[index].age = calculateAge(value);
       }
 
-      if (name === "age") {
-        if (/^\d+$/.test(value)) {
-          // Valid number entered → calculate DOB
-          updatedMembers[index].dob = calculateDOB(value);
-        } else if (value.trim() === "") {
-          // If age is cleared → reset DOB too
-          updatedMembers[index].dob = "";
-        }
-      }
+      // if (name === "age") {
+      //   if (/^\d+$/.test(value)) {
+      //     // Valid number entered → calculate DOB
+      //     updatedMembers[index].dob = calculateDOB(value);
+      //   } else if (value.trim() === "") {
+      //     // If age is cleared → reset DOB too
+      //     updatedMembers[index].dob = "";
+      //   }
+      // }
 
       setMembers(updatedMembers);
 
@@ -1833,10 +1841,13 @@ const AppointmentBooking = () => {
         delete updatedErrors[`${name}_${index}`];
         return updatedErrors;
       });
-    }
+
+
     let updatedData = { ...formData, [name]: value };
-     setFormData(updatedData);
+    setFormData(updatedData);
     console.log(members);
+    }
+
   };
 
 
@@ -2682,7 +2693,25 @@ const AppointmentBooking = () => {
                                         >
                                           DOB:
                                         </label>
-                                        <DatePicker
+                                        <input
+                                            type="date"
+                                            className={`form-control ${formErrors[`dob_${i}`]
+                                              ? "is-invalid input-shake"
+                                              : ""
+                                            }`}
+                                            id="dob"
+                                            name="dob"
+                                            value={formData.dob}
+                                            min={getMinDOB()}
+                                            max={getMaxDOB()}
+                                            onChange={(e) => handleChange(e, i)}
+                                            style={{
+                                              cursor: "pointer",
+                                              backgroundColor: "#fff",
+                                            }}
+                                            onKeyDown={(e) => e.preventDefault()}
+                                          /> 
+                                        {/* <DatePicker
                                           selected={
                                             member.dob
                                               ? new Date(member.dob)
@@ -2715,7 +2744,7 @@ const AppointmentBooking = () => {
                                               ? "is-invalid input-shake"
                                               : ""
                                             }`}
-                                        />
+                                        /> */}
                                       </div>
                                     </div>
 
@@ -3089,10 +3118,10 @@ const AppointmentBooking = () => {
                               >
                                 DOB
                               </label>
-                              {/* <input
+                              <input
                                 type="date"
                                 className={`form-control flex-grow-1 ${
-                                  formErrors.dob ? "is-invalid input-shake" : ""
+                                  formErrors.dob ? "is-invalid" : ""
                                 }`}
                                 id="dob"
                                 name="dob"
@@ -3100,13 +3129,14 @@ const AppointmentBooking = () => {
                                 min={getMinDOB()}
                                 max={getMaxDOB()}
                                 onChange={handleChange}
-                                onKeyDown={(e) => e.preventDefault()}
                                 style={{
                                   cursor: "pointer",
                                   backgroundColor: "#fff",
                                 }}
-                              /> */}{" "}
-                              <DatePicker
+                                onKeyDown={(e) => e.preventDefault()}
+                              /> 
+                              {/* {" "} */}
+                              {/* <DatePicker
                                 selected={
                                   formData.dob ? new Date(formData.dob) : null
                                 }
@@ -3132,7 +3162,7 @@ const AppointmentBooking = () => {
                                 placeholderText="Select DOB"
                                 className={`form-control ${formErrors.dob ? "is-invalid input-shake" : ""
                                   }`}
-                              />
+                              /> */}
                             </div>
                             <div className="col-md-6 d-flex align-items-center">
                               <label
