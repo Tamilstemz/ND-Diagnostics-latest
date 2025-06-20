@@ -743,8 +743,15 @@ const AppointmentBooking = () => {
 
   const isSelected = (code: any) => selectedServices.includes(code);
 
-  const isSelecteddate = (date: Date) =>
-    selectedDate && date.toDateString() === selectedDate.toDateString();
+ const isSelecteddate = (date: Date) => {
+  const compareDate = selectedDate || new Date();
+  const isSelected = date.toDateString() === compareDate.toDateString();
+
+  console.log(`Comparing:${isSelected}`, date.toDateString(), "with", compareDate.toDateString(), "=>", isSelected);
+
+  return isSelected;
+};
+
 
   const isAllSelected = () => selectedServices.length === serviceList.length;
 
